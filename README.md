@@ -1,10 +1,10 @@
-# College Admission Portal (OOPS Project)
+# Communityaddcell - College Admission Portal (OOPS Project)
 
 A Core Java + HTML/CSS/JavaScript web portal modeled after the **State CET Cell Centralized Admission Process (CAP)** for undergraduate engineering admissions.
 
 ## Project Location
 The full application source code, data storage, and documentation are located in:
-[`CollegeAdmissionPortal/`](file:///c:/Projects/oops%20project/CollegeAdmissionPortal/README.md)
+[`CollegeAdmissionPortal/`](CollegeAdmissionPortal/README.md)
 
 ## Admission Workflow
 ```
