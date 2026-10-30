@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<!-- Declare standard HTML5 document type -->
 <html lang="en">
 <head>
-    <!-- Character set definition -->
     <meta charset="UTF-8">
-    <!-- Mobile responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Page title -->
     <title>Admission Application Form - CET Admission Portal</title>
-    <!-- Link external CSS stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,7 +17,6 @@
                 <h1>State CET Cell - Admission Portal</h1>
                 <p>Centralized Admission Application Form (CAP Round 1)</p>
             </div>
-            <!-- Navigation links -->
             <nav>
                 <a href="index.html">Home</a>
                 <a href="application.html" class="btn-nav-active">Application Form</a>
@@ -34,7 +28,7 @@
 
     <!-- Notice Bar -->
     <div class="notice-bar">
-        Carefully enter your examination marks and branch preference. Form can be submitted only once per candidate.
+        Please complete all sections: Personal details, Academic scores, Document uploads, and Branch preferences in priority order.
     </div>
 
     <!-- ============================================================= -->
@@ -43,53 +37,57 @@
     <main>
         <div class="card">
 
-            <!-- Card Header -->
             <div class="card-header">
                 <h2>Engineering Degree Admission Form</h2>
-                <p>Fill in your academic marks and preferred branch of study.</p>
+                <p>Submit your academic qualifications, credential documents, and prioritized branch preferences.</p>
             </div>
 
-            <!-- Success Alert Box -->
+            <!-- Alerts -->
             <div id="successAlert" class="alert alert-success"></div>
-
-            <!-- Error Alert Box -->
             <div id="errorAlert" class="alert alert-error"></div>
+            <div id="progressAlert" class="alert alert-info"></div>
 
-            <!-- Application Form -->
             <form id="admissionForm">
 
-                <!-- Row 1: Candidate Personal Info -->
+                <!-- ------------------------------------------------------------- -->
+                <!-- SECTION 1: PERSONAL & CONTACT INFORMATION                    -->
+                <!-- ------------------------------------------------------------- -->
+                <div class="form-section-title">
+                    <span class="section-num">1</span> Personal & Contact Information
+                </div>
+
                 <div class="form-row">
-                    <!-- Candidate Name -->
                     <div class="form-col form-group">
                         <label for="name">Candidate Full Name <span class="required-star">*</span></label>
-                        <input type="text" id="name" name="name" class="form-control" placeholder="Candidate Name" required>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="Candidate Full Name" required>
                     </div>
 
-                    <!-- Candidate Email -->
                     <div class="form-col form-group">
                         <label for="email">Registered Email Address <span class="required-star">*</span></label>
                         <input type="email" id="email" name="email" class="form-control" placeholder="student@example.com" required>
                     </div>
                 </div>
 
-                <!-- Row 2: Academic Marks -->
+                <!-- ------------------------------------------------------------- -->
+                <!-- SECTION 2: ACADEMIC MARKS & CATEGORY                         -->
+                <!-- ------------------------------------------------------------- -->
+                <div class="form-section-title">
+                    <span class="section-num">2</span> Academic Qualifications & Category
+                </div>
+
                 <div class="form-row">
-                    <!-- 10th Standard (SSC) Percentage -->
                     <div class="form-col form-group">
                         <label for="sscMarks">10th Standard (SSC) % <span class="required-star">*</span></label>
                         <input type="number" id="sscMarks" name="sscMarks" class="form-control" step="0.01" min="35" max="100" placeholder="e.g. 88.50" required>
                         <div class="form-hint">Minimum 35% required.</div>
                     </div>
 
-                    <!-- 12th Standard (HSC) Percentage -->
                     <div class="form-col form-group">
                         <label for="hscMarks">12th Standard (HSC) % <span class="required-star">*</span></label>
                         <input type="number" id="hscMarks" name="hscMarks" class="form-control" step="0.01" min="35" max="100" placeholder="e.g. 85.20" required>
                         <div class="form-hint">PCM / PCB aggregate marks percentage.</div>
                     </div>
 
-                    <!-- CET Exam Score / Percentile -->
                     <div class="form-col form-group">
                         <label for="cetScore">MHT-CET Percentile / Score <span class="required-star">*</span></label>
                         <input type="number" id="cetScore" name="cetScore" class="form-control" step="0.01" min="0" max="100" placeholder="e.g. 94.60" required>
@@ -97,23 +95,7 @@
                     </div>
                 </div>
 
-                <!-- Row 3: Course Preference & Reservation Category -->
                 <div class="form-row">
-                    <!-- Preferred Engineering Branch -->
-                    <div class="form-col form-group">
-                        <label for="course">Preferred Engineering Branch <span class="required-star">*</span></label>
-                        <select id="course" name="course" class="form-control" required>
-                            <option value="">-- Select Course / Branch --</option>
-                            <option value="Computer Engineering">Computer Engineering</option>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
-                            <option value="Electronics & Telecommunication">Electronics & Telecommunication</option>
-                            <option value="Mechanical Engineering">Mechanical Engineering</option>
-                            <option value="Civil Engineering">Civil Engineering</option>
-                        </select>
-                    </div>
-
-                    <!-- Admission Category -->
                     <div class="form-col form-group">
                         <label for="category">Admission Category <span class="required-star">*</span></label>
                         <select id="category" name="category" class="form-control" required>
@@ -126,17 +108,111 @@
                     </div>
                 </div>
 
+                <!-- ------------------------------------------------------------- -->
+                <!-- SECTION 3: STUDENT DOCUMENT UPLOAD                            -->
+                <!-- ------------------------------------------------------------- -->
+                <div class="form-section-title">
+                    <span class="section-num">3</span> Mandatory Document Uploads
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                    Upload clear scans in <strong>PDF, JPG, JPEG, or PNG</strong> format. Maximum file size is <strong>5 MB</strong> per document.
+                </p>
+
+                <div class="doc-upload-grid">
+                    <!-- Doc 1: Aadhaar Card -->
+                    <div class="doc-upload-card" id="card_aadhaar">
+                        <div class="doc-title">
+                            <span>Aadhaar Card <span class="required-star">*</span></span>
+                            <span class="badge badge-pending" id="badge_aadhaar">Required</span>
+                        </div>
+                        <div class="doc-desc">Government Identity Proof (Front & Back)</div>
+                        <input type="file" id="doc_aadhaar" class="doc-file-input" accept=".pdf,.jpg,.jpeg,.png" required onchange="handleFileSelect('aadhaar', this)">
+                        <div class="doc-file-info" id="info_aadhaar" style="display: none;"></div>
+                    </div>
+
+                    <!-- Doc 2: SSC Marksheet -->
+                    <div class="doc-upload-card" id="card_ssc">
+                        <div class="doc-title">
+                            <span>SSC (10th) Marksheet <span class="required-star">*</span></span>
+                            <span class="badge badge-pending" id="badge_ssc">Required</span>
+                        </div>
+                        <div class="doc-desc">Secondary School Certificate Examination</div>
+                        <input type="file" id="doc_ssc" class="doc-file-input" accept=".pdf,.jpg,.jpeg,.png" required onchange="handleFileSelect('ssc', this)">
+                        <div class="doc-file-info" id="info_ssc" style="display: none;"></div>
+                    </div>
+
+                    <!-- Doc 3: HSC Marksheet -->
+                    <div class="doc-upload-card" id="card_hsc">
+                        <div class="doc-title">
+                            <span>HSC (12th) Marksheet <span class="required-star">*</span></span>
+                            <span class="badge badge-pending" id="badge_hsc">Required</span>
+                        </div>
+                        <div class="doc-desc">Higher Secondary Certificate Examination</div>
+                        <input type="file" id="doc_hsc" class="doc-file-input" accept=".pdf,.jpg,.jpeg,.png" required onchange="handleFileSelect('hsc', this)">
+                        <div class="doc-file-info" id="info_hsc" style="display: none;"></div>
+                    </div>
+
+                    <!-- Doc 4: CET Scorecard -->
+                    <div class="doc-upload-card" id="card_cet">
+                        <div class="doc-title">
+                            <span>CET Marksheet / Scorecard <span class="required-star">*</span></span>
+                            <span class="badge badge-pending" id="badge_cet">Required</span>
+                        </div>
+                        <div class="doc-desc">Official MHT-CET Scorecard / Result Slip</div>
+                        <input type="file" id="doc_cet" class="doc-file-input" accept=".pdf,.jpg,.jpeg,.png" required onchange="handleFileSelect('cet', this)">
+                        <div class="doc-file-info" id="info_cet" style="display: none;"></div>
+                    </div>
+
+                    <!-- Doc 5: Other Supporting Document -->
+                    <div class="doc-upload-card" id="card_other">
+                        <div class="doc-title">
+                            <span>Other Supporting Document</span>
+                            <span class="badge badge-pending" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1;" id="badge_other">Optional</span>
+                        </div>
+                        <div class="doc-desc">Caste Certificate / Domicile / Income / Non-Creamy Layer</div>
+                        <input type="file" id="doc_other" class="doc-file-input" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileSelect('other', this)">
+                        <div class="doc-file-info" id="info_other" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- ------------------------------------------------------------- -->
+                <!-- SECTION 4: BRANCH PREFERENCE SELECTION                        -->
+                <!-- ------------------------------------------------------------- -->
+                <div class="form-section-title">
+                    <span class="section-num">4</span> Engineering Branch Preference Selection
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                    Select your preferred engineering branches in priority order (1st Priority = Highest Preference).
+                    Use the <strong>Up (▲)</strong> and <strong>Down (▼)</strong> buttons to arrange your choices.
+                </p>
+
+                <!-- Dynamic Branch Preferences List -->
+                <div class="pref-list" id="preferencesList">
+                    <!-- Javascript populates 6 priority items -->
+                </div>
+
+                <!-- Live Preference Review Summary Box -->
+                <div class="pref-review-box">
+                    <h4>Review Your Priority Order Before Submitting:</h4>
+                    <ol class="pref-review-ordered" id="prefReviewList">
+                        <!-- Javascript populates preview -->
+                    </ol>
+                </div>
+
+                <!-- Hidden field for primary course compatibility -->
+                <input type="hidden" id="course" name="course">
+
                 <!-- Declaration Checkbox -->
-                <div class="form-group" style="margin-top: 10px;">
+                <div class="form-group" style="margin-top: 15px;">
                     <label style="font-weight: normal; display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" required>
-                        I declare that all the information provided above is authentic and verified with my original marksheets.
+                        I declare that all personal details, academic marks, uploaded marksheets, and branch preferences are authentic and verified by me.
                     </label>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary" style="padding: 12px 30px; font-size: 16px;">
-                    Submit Application Form
+                <button type="submit" id="submitBtn" class="btn btn-primary" style="padding: 12px 32px; font-size: 16px;">
+                    Submit Application & Upload Documents
                 </button>
 
             </form>
@@ -144,94 +220,294 @@
         </div>
     </main>
 
-    <!-- ============================================================= -->
-    <!-- FOOTER SECTION                                                -->
-    <!-- ============================================================= -->
+    <!-- Footer -->
     <footer>
         <p>&copy; 2026 State Common Entrance Test Cell • College Admission Portal</p>
     </footer>
 
     <!-- ============================================================= -->
-    <!-- JAVASCRIPT: Connects Form to Core Java Backend                 -->
+    <!-- JAVASCRIPT: Document Validation, Preference Reordering & Submit-->
     <!-- ============================================================= -->
     <script>
-        // Check if student is logged in from login.html
+        // Pre-fill student email and name if logged in
         const savedEmail = sessionStorage.getItem('studentEmail');
         const savedName = sessionStorage.getItem('studentName');
+        if (savedEmail) document.getElementById('email').value = savedEmail;
+        if (savedName) document.getElementById('name').value = savedName;
 
-        // Pre-fill email and name if available in session
-        if (savedEmail) {
-            document.getElementById('email').value = savedEmail;
-        }
-        if (savedName) {
-            document.getElementById('name').value = savedName;
+        // List of Available Engineering Branches
+        const ALL_BRANCHES = [
+            "Computer Engineering",
+            "Information Technology",
+            "Artificial Intelligence & Data Science",
+            "Electronics & Telecommunication",
+            "Mechanical Engineering",
+            "Civil Engineering"
+        ];
+
+        // State array of currently ordered preferences (1st to 6th)
+        let branchPreferences = [...ALL_BRANCHES];
+
+        // Render Branch Preferences interactive list
+        function renderPreferences() {
+            const container = document.getElementById('preferencesList');
+            const reviewList = document.getElementById('prefReviewList');
+
+            container.innerHTML = '';
+            reviewList.innerHTML = '';
+
+            branchPreferences.forEach((branch, index) => {
+                const item = document.createElement('div');
+                item.className = 'pref-item';
+
+                // Rank circle (1 to 6)
+                const rank = document.createElement('div');
+                rank.className = 'pref-rank';
+                rank.textContent = index + 1;
+
+                // Select dropdown
+                const select = document.createElement('select');
+                select.className = 'form-control pref-select';
+                ALL_BRANCHES.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b;
+                    opt.textContent = b;
+                    if (b === branch) opt.selected = true;
+                    select.appendChild(opt);
+                });
+
+                select.addEventListener('change', function() {
+                    handleBranchChange(index, this.value);
+                });
+
+                // Move Up / Move Down buttons
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'pref-btn-group';
+
+                const upBtn = document.createElement('button');
+                upBtn.type = 'button';
+                upBtn.className = 'pref-btn';
+                upBtn.textContent = '▲';
+                upBtn.title = 'Move Up Priority';
+                upBtn.disabled = (index === 0);
+                upBtn.onclick = () => movePreference(index, -1);
+
+                const downBtn = document.createElement('button');
+                downBtn.type = 'button';
+                downBtn.className = 'pref-btn';
+                downBtn.textContent = '▼';
+                downBtn.title = 'Move Down Priority';
+                downBtn.disabled = (index === branchPreferences.length - 1);
+                downBtn.onclick = () => movePreference(index, 1);
+
+                btnGroup.appendChild(upBtn);
+                btnGroup.appendChild(downBtn);
+
+                item.appendChild(rank);
+                item.appendChild(select);
+                item.appendChild(btnGroup);
+                container.appendChild(item);
+
+                // Add to review list
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>Priority ${index + 1}:</strong> ${branch}`;
+                reviewList.appendChild(li);
+            });
+
+            // Update primary course choice
+            document.getElementById('course').value = branchPreferences[0];
         }
 
-        // Form and alert element references
+        function movePreference(index, delta) {
+            const target = index + delta;
+            if (target < 0 || target >= branchPreferences.length) return;
+            const temp = branchPreferences[index];
+            branchPreferences[index] = branchPreferences[target];
+            branchPreferences[target] = temp;
+            renderPreferences();
+        }
+
+        function handleBranchChange(index, newValue) {
+            // If the user picked a branch already elsewhere, swap with that position
+            const existingIndex = branchPreferences.indexOf(newValue);
+            if (existingIndex !== -1 && existingIndex !== index) {
+                branchPreferences[existingIndex] = branchPreferences[index];
+            }
+            branchPreferences[index] = newValue;
+            renderPreferences();
+        }
+
+        // Initialize preferences on page load
+        renderPreferences();
+
+        // -------------------------------------------------------------
+        // File Selection & Client-Side Validation
+        // -------------------------------------------------------------
+        const selectedFiles = {};
+
+        function handleFileSelect(docType, input) {
+            const file = input.files[0];
+            const card = document.getElementById('card_' + docType);
+            const badge = document.getElementById('badge_' + docType);
+            const info = document.getElementById('info_' + docType);
+
+            if (!file) {
+                delete selectedFiles[docType];
+                card.classList.remove('doc-uploaded');
+                info.style.display = 'none';
+                if (badge) {
+                    badge.className = 'badge badge-pending';
+                    badge.textContent = (docType === 'other') ? 'Optional' : 'Required';
+                }
+                return;
+            }
+
+            // Validate format: PDF, JPG, JPEG, PNG
+            const fileName = file.name;
+            const ext = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+            const validExts = ['.pdf', '.jpg', '.jpeg', '.png'];
+
+            if (!validExts.includes(ext)) {
+                alert(`Invalid file format for ${docType.toUpperCase()}: ${ext}\nPlease select a PDF, JPG, JPEG, or PNG file.`);
+                input.value = '';
+                delete selectedFiles[docType];
+                card.classList.remove('doc-uploaded');
+                info.style.display = 'none';
+                return;
+            }
+
+            // Validate file size: maximum 5 MB (5 * 1024 * 1024 bytes)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert(`File size exceeds 5MB limit for ${docType.toUpperCase()} (${(file.size / (1024*1024)).toFixed(2)} MB). Please upload a smaller file.`);
+                input.value = '';
+                delete selectedFiles[docType];
+                card.classList.remove('doc-uploaded');
+                info.style.display = 'none';
+                return;
+            }
+
+            // Valid file selected
+            selectedFiles[docType] = file;
+            card.classList.add('doc-uploaded');
+            info.innerHTML = `&#10004; Selected: <strong>${fileName}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+            info.style.display = 'flex';
+
+            if (badge) {
+                badge.className = 'badge badge-approved';
+                badge.textContent = 'Selected';
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Form Submission Handler
+        // -------------------------------------------------------------
         const admissionForm = document.getElementById('admissionForm');
         const successAlert = document.getElementById('successAlert');
         const errorAlert = document.getElementById('errorAlert');
+        const progressAlert = document.getElementById('progressAlert');
+        const submitBtn = document.getElementById('submitBtn');
 
-        // Form submission handler
-        admissionForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+        admissionForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-            // Clear previous alerts
             successAlert.style.display = 'none';
             errorAlert.style.display = 'none';
+            progressAlert.style.display = 'none';
 
-            // Extract input values
-            const email = document.getElementById('email').value;
-            const name = document.getElementById('name').value;
+            // Validate required files
+            const requiredDocs = ['aadhaar', 'ssc', 'hsc', 'cet'];
+            for (const doc of requiredDocs) {
+                if (!selectedFiles[doc]) {
+                    errorAlert.textContent = `Please select and attach your ${doc.toUpperCase()} document before submitting!`;
+                    errorAlert.style.display = 'block';
+                    document.getElementById('doc_' + doc).focus();
+                    return;
+                }
+            }
+
+            // Extract form values
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
             const sscMarks = document.getElementById('sscMarks').value;
             const hscMarks = document.getElementById('hscMarks').value;
             const cetScore = document.getElementById('cetScore').value;
-            const course = document.getElementById('course').value;
             const category = document.getElementById('category').value;
+            const course = branchPreferences[0];
+            const preferencesStr = branchPreferences.join(';');
 
-            // Prepare POST body parameters
-            const formData = new URLSearchParams();
-            formData.append('email', email);
-            formData.append('name', name);
-            formData.append('sscMarks', sscMarks);
-            formData.append('hscMarks', hscMarks);
-            formData.append('cetScore', cetScore);
-            formData.append('course', course);
-            formData.append('category', category);
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting Application...';
 
-            // Send POST request to Java backend /api/apply
-            fetch('/api/apply', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData.toString()
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    successAlert.textContent = data.message + " (Application ID: " + data.appId + "). Redirecting to Status page...";
-                    successAlert.style.display = 'block';
+            progressAlert.textContent = 'Step 1/2: Submitting academic marks and branch preferences...';
+            progressAlert.style.display = 'block';
 
-                    // Save email in session to view status
-                    sessionStorage.setItem('studentEmail', email);
+            try {
+                // Step 1: Submit application details to /api/apply
+                const formData = new URLSearchParams();
+                formData.append('name', name);
+                formData.append('email', email);
+                formData.append('sscMarks', sscMarks);
+                formData.append('hscMarks', hscMarks);
+                formData.append('cetScore', cetScore);
+                formData.append('course', course);
+                formData.append('category', category);
+                formData.append('preferences', preferencesStr);
 
-                    // Redirect to status page after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'status.html?email=' + encodeURIComponent(email);
-                    }, 2000);
-                } else {
-                    errorAlert.textContent = data.message;
-                    errorAlert.style.display = 'block';
+                const applyResponse = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData.toString()
+                });
+
+                const applyData = await applyResponse.json();
+
+                if (!applyData.success) {
+                    throw new Error(applyData.message || 'Application submission failed');
                 }
-            })
-            .catch(error => {
-                errorAlert.textContent = 'Failed to submit form. Please verify backend server is running.';
+
+                const appId = applyData.appId;
+                sessionStorage.setItem('studentEmail', email);
+
+                // Step 2: Upload all selected documents
+                const docKeys = Object.keys(selectedFiles);
+                for (let i = 0; i < docKeys.length; i++) {
+                    const docType = docKeys[i];
+                    const file = selectedFiles[docType];
+
+                    progressAlert.textContent = `Step 2/2: Uploading documents (${i + 1}/${docKeys.length}): ${file.name}...`;
+
+                    const uploadUrl = `/api/upload-document?appId=${encodeURIComponent(appId)}&email=${encodeURIComponent(email)}&docType=${encodeURIComponent(docType)}&fileName=${encodeURIComponent(file.name)}`;
+
+                    const uploadRes = await fetch(uploadUrl, {
+                        method: 'POST',
+                        body: file
+                    });
+
+                    const uploadData = await uploadRes.json();
+                    if (!uploadData.success) {
+                        console.warn(`Warning: Could not upload ${docType}:`, uploadData.message);
+                    }
+                }
+
+                // Complete!
+                progressAlert.style.display = 'none';
+                successAlert.textContent = `Application submitted successfully! Reference ID: ${appId}. All documents uploaded. Redirecting to your Application Status...`;
+                successAlert.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = `status.html?email=${encodeURIComponent(email)}`;
+                }, 2000);
+
+            } catch (err) {
+                progressAlert.style.display = 'none';
+                errorAlert.textContent = err.message || 'Failed to submit application. Please check backend connection.';
                 errorAlert.style.display = 'block';
-            });
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application & Upload Documents';
+            }
         });
     </script>
 
 </body>
 </html>
-

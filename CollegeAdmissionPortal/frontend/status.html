@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<!-- Declare standard HTML5 document type -->
 <html lang="en">
 <head>
-    <!-- Character set definition -->
     <meta charset="UTF-8">
-    <!-- Viewport responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Title -->
-    <title>Application Status - CET Admission Portal</title>
-    <!-- CSS link -->
+    <title>Application Status & Branch Acceptance - CET Admission Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,9 +15,8 @@
         <div class="header-container">
             <div class="portal-title">
                 <h1>State CET Cell - Admission Portal</h1>
-                <p>Candidate Application & Scrutiny Status Tracker</p>
+                <p>Candidate Application, Document Verification & Branch Acceptance Tracker</p>
             </div>
-            <!-- Navigation links -->
             <nav>
                 <a href="index.html">Home</a>
                 <a href="application.html">Apply</a>
@@ -35,7 +29,7 @@
 
     <!-- Notice Bar -->
     <div class="notice-bar">
-        Application scrutiny is conducted by the Admission Committee. Check this page for status updates.
+        Admission decisions and seat allocations are released here. Candidates must explicitly Accept allocated seats to confirm admission.
     </div>
 
     <!-- ============================================================= -->
@@ -44,87 +38,169 @@
     <main>
 
         <!-- Search / Lookup Card -->
-        <section class="card" style="max-width: 700px; margin: 0 auto 25px auto;">
+        <section class="card" style="max-width: 800px; margin: 0 auto 25px auto;">
             <div class="card-header">
-                <h2>Track Application Status</h2>
-                <p>Enter your registered email address to view your submitted application details.</p>
+                <h2>Track Application Status & Seat Allotment</h2>
+                <p>Enter your registered email address to view verification progress, uploaded documents, and branch allocation.</p>
             </div>
 
-            <!-- Lookup Form -->
             <form id="searchForm" style="display: flex; gap: 10px;">
-                <!-- Email Search Input -->
                 <input type="email" id="searchEmail" class="form-control" placeholder="Enter your registered email (e.g. rahul@gmail.com)" required>
-                <!-- Search Button -->
                 <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Search Status</button>
             </form>
         </section>
 
-        <!-- Status Result Card (Hidden until data is fetched) -->
-        <section id="statusCard" class="card" style="display: none; max-width: 700px; margin: 0 auto;">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <h2>Admission Application Details</h2>
-                    <p>Reference ID: <strong id="appIdDisplay" style="color: #0d3b66;"></strong></p>
-                </div>
-                <!-- Status Badge Container -->
-                <div id="statusBadgeContainer"></div>
-            </div>
+        <!-- Action Response Alert Box -->
+        <div id="statusActionAlert" class="alert alert-success" style="max-width: 800px; margin: 0 auto 20px auto;"></div>
 
-            <!-- Details Grid -->
-            <div class="detail-grid">
-                <!-- Candidate Name -->
-                <div class="detail-item">
-                    <div class="detail-label">Candidate Name</div>
-                    <div id="dispName" class="detail-value">-</div>
+        <!-- --------------------------------------------------------- -->
+        <!-- DYNAMIC STATUS CONTAINER (Populated when application found) -->
+        <!-- --------------------------------------------------------- -->
+        <div id="statusResultContainer" style="display: none; max-width: 800px; margin: 0 auto;">
+
+            <!-- BANNER 1: PROVISIONAL ALLOCATION - AWAITING STUDENT ACCEPTANCE -->
+            <section id="allocationDecisionBanner" class="allocation-banner" style="display: none;">
+                <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #f4a261; font-weight: 700;">
+                    &#127891; PROVISIONAL SEAT ALLOCATION DECISION
+                </div>
+                <div class="allocation-branch-name" id="allocBranchDisplay">
+                    Computer Engineering
+                </div>
+                <p style="font-size: 14px; opacity: 0.95; margin-bottom: 12px;" id="allocDetailsText">
+                    You have been provisionally allocated a seat based on your CET Merit Score and admission category.
+                </p>
+                <div style="background-color: rgba(255, 255, 255, 0.12); border-left: 3px solid #f4a261; padding: 10px 14px; border-radius: 4px; font-size: 13px; margin-bottom: 15px;">
+                    <strong>Admission Committee Remarks:</strong> <span id="allocRemarksText">-</span>
+                </div>
+                <div style="background-color: #ffffff; color: #1e293b; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
+                    <strong>&#9888; Important Instruction:</strong>
+                    You must explicitly <strong>Accept</strong> your allocated branch to confirm your admission.
+                    Students are NOT considered admitted until acceptance is confirmed.
+                    If you reject, your application returns to the committee for further review and reallocation.
+                </div>
+                <div class="allocation-actions">
+                    <button onclick="respondToAllocation('Accept')" class="btn btn-success" style="padding: 12px 24px; font-size: 15px; font-weight: 700;">
+                        &#10004; Accept Allocated Branch & Confirm Admission
+                    </button>
+                    <button onclick="respondToAllocation('Reject')" class="btn btn-danger" style="padding: 12px 20px; font-size: 14px;">
+                        &#10008; Reject Allocation / Request Reallocation
+                    </button>
+                </div>
+            </section>
+
+            <!-- BANNER 2: ADMISSION OFFICIALLY CONFIRMED -->
+            <section id="admissionConfirmedBanner" class="admission-confirmed-card" style="display: none;">
+                <div class="admission-confirmed-seal">&#127891; &#10004;</div>
+                <div class="admission-confirmed-title">ADMISSION CONFIRMED</div>
+                <p style="font-size: 15px; color: #166534; margin: 8px 0 15px 0;">
+                    Congratulations! Your seat in <strong id="confirmedBranchDisplay" style="color: #0d3b66; font-size: 18px;">Computer Engineering</strong> is officially confirmed.
+                </p>
+                <div style="font-size: 13px; color: #4b5563; margin-bottom: 15px;">
+                    All credentials and marksheets have been verified and candidate acceptance was recorded.
+                </div>
+                <button onclick="window.print()" class="btn btn-primary btn-sm">&#128424; Print Provisional Admission Slip</button>
+            </section>
+
+            <!-- BANNER 3: ALLOCATION REJECTED BY CANDIDATE -->
+            <section id="allocationRejectedBanner" class="card" style="display: none; border-left: 4px solid #e63946; background-color: #fff5f5;">
+                <h3 style="color: #e63946; margin-bottom: 6px;">Allocation Rejected by Candidate</h3>
+                <p style="font-size: 14px; color: #475569;">
+                    You have surrendered your provisionally allocated seat. Your application has been returned to the Admission Committee for review and possible reallocation in subsequent rounds.
+                </p>
+            </section>
+
+            <!-- Main Application Details Card -->
+            <section class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2>Admission Application Details</h2>
+                        <p>Reference ID: <strong id="appIdDisplay" style="color: #0d3b66; font-size: 16px;"></strong></p>
+                    </div>
+                    <div id="statusBadgeContainer"></div>
                 </div>
 
-                <!-- Email -->
-                <div class="detail-item">
-                    <div class="detail-label">Registered Email</div>
-                    <div id="dispEmail" class="detail-value" style="font-size: 14px;">-</div>
+                <!-- Personal & Academic Details Grid -->
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Candidate Name</div>
+                        <div id="dispName" class="detail-value">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Registered Email</div>
+                        <div id="dispEmail" class="detail-value" style="font-size: 14px;">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Contact Phone</div>
+                        <div id="dispPhone" class="detail-value">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Category</div>
+                        <div id="dispCategory" class="detail-value">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">10th SSC Marks</div>
+                        <div id="dispSsc" class="detail-value">-</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">12th HSC Marks</div>
+                        <div id="dispHsc" class="detail-value">-</div>
+                    </div>
+
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <div class="detail-label">MHT-CET Percentile</div>
+                        <div id="dispCet" class="detail-value" style="color: #2a9d8f; font-size: 18px;">-</div>
+                    </div>
                 </div>
 
-                <!-- SSC Marks -->
-                <div class="detail-item">
-                    <div class="detail-label">10th SSC Marks</div>
-                    <div id="dispSsc" class="detail-value">-</div>
+                <!-- Uploaded Documents Section -->
+                <div class="form-section-title" style="margin-top: 25px;">
+                    Uploaded Credential Documents & Verification
+                </div>
+                <div style="margin-bottom: 10px; font-size: 13px;">
+                    Verification Status: <span id="dispDocStatusBadge" class="badge badge-pending">Pending Verification</span>
                 </div>
 
-                <!-- HSC Marks -->
-                <div class="detail-item">
-                    <div class="detail-label">12th HSC Marks</div>
-                    <div id="dispHsc" class="detail-value">-</div>
+                <div class="table-responsive" style="margin-top: 0; margin-bottom: 25px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>File Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dispDocTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- CET Score -->
-                <div class="detail-item">
-                    <div class="detail-label">MHT-CET Percentile</div>
-                    <div id="dispCet" class="detail-value">-</div>
+                <!-- Branch Preferences in Priority Order -->
+                <div class="form-section-title">
+                    Submitted Branch Preferences (Priority Order)
                 </div>
-
-                <!-- Category -->
-                <div class="detail-item">
-                    <div class="detail-label">Admission Category</div>
-                    <div id="dispCategory" class="detail-value">-</div>
-                </div>
-
-                <!-- Selected Branch -->
-                <div class="detail-item" style="grid-column: 1 / -1;">
-                    <div class="detail-label">Selected Course / Branch</div>
-                    <div id="dispCourse" class="detail-value" style="color: #0d3b66; font-size: 18px;">-</div>
-                </div>
+                <ol id="dispPrefList" style="padding-left: 20px; line-height: 1.8; color: #1e293b; font-size: 14px; margin-bottom: 25px;">
+                    <!-- Populated dynamically -->
+                </ol>
 
                 <!-- Committee Remarks -->
-                <div class="detail-item" style="grid-column: 1 / -1; background-color: #ffffff; border-left: 4px solid #0d3b66;">
+                <div class="detail-item" style="background-color: #ffffff; border-left: 4px solid #0d3b66;">
                     <div class="detail-label">Admission Committee Remarks</div>
                     <div id="dispRemarks" style="font-size: 15px; color: #334155; margin-top: 4px;">-</div>
                 </div>
-            </div>
 
-        </section>
+            </section>
 
-        <!-- Not Found Message Card -->
-        <section id="notFoundCard" class="card" style="display: none; max-width: 700px; margin: 0 auto; text-align: center;">
+        </div>
+
+        <!-- Not Found Notice Card -->
+        <section id="notFoundCard" class="card" style="display: none; max-width: 800px; margin: 0 auto; text-align: center;">
             <h3 style="color: #e63946; margin-bottom: 10px;">No Application Found</h3>
             <p style="color: #64748b; margin-bottom: 20px;">
                 We could not find an admission application submitted with this email.
@@ -135,78 +211,70 @@
     </main>
 
     <!-- ============================================================= -->
-    <!-- FOOTER SECTION                                                -->
+    <!-- MODAL: DOCUMENT PREVIEW MODAL                                 -->
     <!-- ============================================================= -->
+    <div id="previewModal" class="modal-backdrop">
+        <div class="modal-dialog" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="previewDocTitle">Document Preview</h3>
+                <button class="modal-close" onclick="closePreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div class="doc-preview-container" id="previewContainer">
+                    <p style="color: #64748b;">Loading document preview...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="previewExternalLink" href="#" target="_blank" class="btn btn-accent btn-sm">&#8599; Open in New Tab</a>
+                <a id="previewDownloadLink" href="#" download class="btn btn-primary btn-sm">&#128190; Download File</a>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closePreviewModal()" style="background-color: #94a3b8; color: #ffffff;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <footer>
         <p>&copy; 2026 State Common Entrance Test Cell • College Admission Portal</p>
     </footer>
 
     <!-- ============================================================= -->
-    <!-- JAVASCRIPT: Queries Java Backend for Application Status        -->
+    <!-- JAVASCRIPT: Status Queries & Branch Acceptance Actions        -->
     <!-- ============================================================= -->
     <script>
-        // Check if email was provided via URL parameter (?email=...) or sessionStorage
         const urlParams = new URLSearchParams(window.location.search);
         const paramEmail = urlParams.get('email') || sessionStorage.getItem('studentEmail');
 
-        // References to UI containers
         const searchInput = document.getElementById('searchEmail');
-        const statusCard = document.getElementById('statusCard');
+        const resultContainer = document.getElementById('statusResultContainer');
         const notFoundCard = document.getElementById('notFoundCard');
         const badgeContainer = document.getElementById('statusBadgeContainer');
+        const actionAlert = document.getElementById('statusActionAlert');
 
-        // If email is available on page load, automatically query status
+        let currentAppData = null;
+
         if (paramEmail) {
             searchInput.value = paramEmail;
             fetchStatus(paramEmail);
         }
 
-        // Form submission event
         document.getElementById('searchForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = searchInput.value.trim();
-            if (email) {
-                fetchStatus(email);
-            }
+            if (email) fetchStatus(email);
         });
 
-        // Function: Fetches application data from Java backend /api/status endpoint
         function fetchStatus(email) {
-            // Hide previous results while loading
-            statusCard.style.display = 'none';
+            resultContainer.style.display = 'none';
             notFoundCard.style.display = 'none';
+            actionAlert.style.display = 'none';
 
-            // Send GET request to Java backend
             fetch('/api/status?email=' + encodeURIComponent(email))
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(data => {
                     if (data.found) {
-                        // Populate details into the UI
-                        document.getElementById('appIdDisplay').textContent = data.appId;
-                        document.getElementById('dispName').textContent = data.name;
-                        document.getElementById('dispEmail').textContent = data.email;
-                        document.getElementById('dispSsc').textContent = data.ssc.toFixed(2) + '%';
-                        document.getElementById('dispHsc').textContent = data.hsc.toFixed(2) + '%';
-                        document.getElementById('dispCet').textContent = data.cet.toFixed(2) + ' Percentile';
-                        document.getElementById('dispCourse').textContent = data.course;
-                        document.getElementById('dispCategory').textContent = data.category;
-                        document.getElementById('dispRemarks').textContent = data.remarks || 'No remarks provided.';
-
-                        // Render appropriate status badge based on status value
-                        let badgeHtml = '';
-                        if (data.status.toLowerCase() === 'approved') {
-                            badgeHtml = '<span class="badge badge-approved">&#10004; APPROVED / SEAT ALLOTTED</span>';
-                        } else if (data.status.toLowerCase() === 'rejected') {
-                            badgeHtml = '<span class="badge badge-rejected">&#10008; APPLICATION REJECTED</span>';
-                        } else {
-                            badgeHtml = '<span class="badge badge-pending">&#9203; PENDING VERIFICATION</span>';
-                        }
-                        badgeContainer.innerHTML = badgeHtml;
-
-                        // Show the status card
-                        statusCard.style.display = 'block';
+                        currentAppData = data;
+                        renderStatusDetails(data);
                     } else {
-                        // Show not found notice
                         notFoundCard.style.display = 'block';
                     }
                 })
@@ -214,8 +282,182 @@
                     alert('Error connecting to backend server.');
                 });
         }
+
+        function renderStatusDetails(data) {
+            document.getElementById('appIdDisplay').textContent = data.appId;
+            document.getElementById('dispName').textContent = data.name;
+            document.getElementById('dispEmail').textContent = data.email;
+            document.getElementById('dispPhone').textContent = data.phone || 'N/A';
+            document.getElementById('dispCategory').textContent = data.category;
+            document.getElementById('dispSsc').textContent = data.ssc.toFixed(2) + '%';
+            document.getElementById('dispHsc').textContent = data.hsc.toFixed(2) + '%';
+            document.getElementById('dispCet').textContent = data.cet.toFixed(2) + ' Percentile';
+            document.getElementById('dispRemarks').textContent = data.remarks || 'No remarks provided.';
+
+            // Document status badge
+            const docBadge = document.getElementById('dispDocStatusBadge');
+            const vStatus = data.verificationStatus || 'Pending Verification';
+            docBadge.textContent = vStatus;
+            docBadge.className = 'badge ' + (vStatus === 'Documents Verified' ? 'badge-verified' : (vStatus === 'Verification Rejected' ? 'badge-rejected' : 'badge-pending'));
+
+            // Render Document List Table
+            const docTableBody = document.getElementById('dispDocTableBody');
+            docTableBody.innerHTML = '';
+            const docTitles = {
+                'aadhaar': 'Aadhaar Card',
+                'ssc': 'SSC (10th) Marksheet',
+                'hsc': 'HSC (12th) Marksheet',
+                'cet': 'CET Scorecard',
+                'other': 'Other Supporting Document'
+            };
+
+            const docs = data.documents || {};
+            const types = ['aadhaar', 'ssc', 'hsc', 'cet', 'other'];
+
+            types.forEach(t => {
+                const storedFile = docs[t];
+                const tr = document.createElement('tr');
+                if (storedFile) {
+                    tr.innerHTML = `
+                        <td><strong>${docTitles[t]}</strong></td>
+                        <td style="font-size: 13px; color: #0f766e;">${storedFile}</td>
+                        <td><span class="badge badge-approved">&#10004; Uploaded</span></td>
+                        <td>
+                            <button onclick="previewDocument('${data.appId}', '${t}', '${docTitles[t]}')" class="btn btn-accent btn-sm" style="margin-right: 4px;">Preview</button>
+                            <a href="/api/document/download?appId=${encodeURIComponent(data.appId)}&docType=${encodeURIComponent(t)}" class="btn btn-primary btn-sm" download>Download</a>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td>${docTitles[t]}</td>
+                        <td style="color: #94a3b8; font-style: italic;">Not uploaded</td>
+                        <td><span class="badge badge-pending">Missing</span></td>
+                        <td>-</td>
+                    `;
+                }
+                docTableBody.appendChild(tr);
+            });
+
+            // Render Preferences List
+            const prefList = document.getElementById('dispPrefList');
+            prefList.innerHTML = '';
+            const prefs = data.preferences || (data.course ? [data.course] : []);
+            prefs.forEach((p, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>Priority ${idx + 1}:</strong> <span style="color: #0d3b66; font-weight: 600;">${p}</span>`;
+                prefList.appendChild(li);
+            });
+
+            // Render Branch Allocation Banners based on Allocation Status
+            const allocBanner = document.getElementById('allocationDecisionBanner');
+            const confirmedBanner = document.getElementById('admissionConfirmedBanner');
+            const rejectedBanner = document.getElementById('allocationRejectedBanner');
+
+            allocBanner.style.display = 'none';
+            confirmedBanner.style.display = 'none';
+            rejectedBanner.style.display = 'none';
+
+            const allocStatus = (data.allocationStatus || '').toLowerCase();
+            const statusLower = (data.status || '').toLowerCase();
+
+            let overallBadgeHtml = '';
+
+            if (allocStatus === 'accepted' || statusLower === 'admission confirmed' || statusLower === 'approved') {
+                // Confirmed
+                document.getElementById('confirmedBranchDisplay').textContent = data.allocatedBranch || data.course;
+                confirmedBanner.style.display = 'block';
+                overallBadgeHtml = '<span class="badge badge-confirmed">&#10004; ADMISSION CONFIRMED</span>';
+            } else if (allocStatus === 'awaiting student acceptance' || statusLower === 'branch allocated') {
+                // Awaiting acceptance
+                document.getElementById('allocBranchDisplay').textContent = data.allocatedBranch || data.course;
+                document.getElementById('allocRemarksText').textContent = data.allocationRemarks || data.remarks || 'Seat allotted in CAP Round 1.';
+                allocBanner.style.display = 'block';
+                overallBadgeHtml = '<span class="badge badge-awaiting">&#9203; AWAITING YOUR ACCEPTANCE</span>';
+            } else if (allocStatus.includes('rejected by student')) {
+                rejectedBanner.style.display = 'block';
+                overallBadgeHtml = '<span class="badge badge-rejected">&#10008; ALLOCATION REJECTED - PENDING REALLOCATION</span>';
+            } else if (allocStatus === 'rejected' || statusLower === 'rejected') {
+                overallBadgeHtml = '<span class="badge badge-rejected">&#10008; APPLICATION REJECTED</span>';
+            } else {
+                overallBadgeHtml = '<span class="badge badge-pending">&#9203; PENDING ALLOCATION</span>';
+            }
+
+            badgeContainer.innerHTML = overallBadgeHtml;
+            resultContainer.style.display = 'block';
+        }
+
+        // Student responds to branch allocation: Accept or Reject
+        function respondToAllocation(decision) {
+            if (!currentAppData) return;
+
+            let confirmMsg = '';
+            let remarks = '';
+
+            if (decision === 'Accept') {
+                confirmMsg = `Are you sure you want to ACCEPT your allocated branch (${currentAppData.allocatedBranch})?\n\nThis will officially CONFIRM your admission.`;
+                if (!confirm(confirmMsg)) return;
+            } else {
+                confirmMsg = `Are you sure you want to REJECT your allocated branch (${currentAppData.allocatedBranch})?\n\nYour application will return to the Admission Committee for review.`;
+                if (!confirm(confirmMsg)) return;
+                remarks = prompt("Please state your reason for rejecting the allocated branch (e.g. Seeking higher preference branch in next round):", "Seeking higher preference branch in subsequent round.");
+                if (remarks === null) return;
+            }
+
+            const fd = new URLSearchParams();
+            fd.append('appId', currentAppData.appId);
+            fd.append('action', decision);
+            fd.append('remarks', remarks);
+
+            fetch('/api/student/allocation-response', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: fd.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    actionAlert.textContent = data.message;
+                    actionAlert.style.display = 'block';
+                    fetchStatus(currentAppData.email);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(err => {
+                alert('Error updating allocation decision.');
+            });
+        }
+
+        // Preview Document Modal
+        function previewDocument(appId, docType, docTitle) {
+            document.getElementById('previewDocTitle').textContent = `Document Preview: ${docTitle}`;
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = '<p style="color: #64748b;">Loading document preview...</p>';
+
+            const viewUrl = `/api/document/view?appId=${encodeURIComponent(appId)}&docType=${encodeURIComponent(docType)}`;
+            const downloadUrl = `/api/document/download?appId=${encodeURIComponent(appId)}&docType=${encodeURIComponent(docType)}`;
+
+            document.getElementById('previewExternalLink').href = viewUrl;
+            document.getElementById('previewDownloadLink').href = downloadUrl;
+
+            const docs = (currentAppData && currentAppData.documents) ? currentAppData.documents : {};
+            const fileName = docs[docType] || '';
+
+            if (fileName.toLowerCase().endsWith('.pdf')) {
+                container.innerHTML = `<iframe src="${viewUrl}" title="${docTitle}"></iframe>`;
+            } else {
+                container.innerHTML = `<img src="${viewUrl}" alt="${docTitle}" onerror="this.src=''; this.alt='Preview unavailable. Please use Download button.';">`;
+            }
+
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('previewContainer').innerHTML = '';
+        }
     </script>
 
 </body>
 </html>
-

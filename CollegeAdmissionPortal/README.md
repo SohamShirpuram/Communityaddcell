@@ -1,15 +1,47 @@
 # College Admission Portal (OOPS Project)
 
-A basic, clean, and complete **College Admission Portal** modeled after the **CET Cell Centralized Admission Process (CAP)** for undergraduate admissions.
+A complete, clean, and interactive **College Admission Portal** modeled after the **State CET Cell Centralized Admission Process (CAP)** for undergraduate engineering admissions.
 
 Built strictly using:
-* **Frontend:** HTML5 + CSS3 (No React, No Angular, No UI libraries)
-* **Backend:** Core Java (Standard Library only — No Spring Boot, No external JARs)
-* **Data Storage:** Notepad / Plain text files (`.txt`) using `BufferedReader` and `BufferedWriter`
+* **Frontend:** HTML5 + Vanilla CSS3 + Vanilla JavaScript (No React, No Angular, No third-party UI libraries)
+* **Backend:** Core Java Standard Library only (`com.sun.net.httpserver.HttpServer` — No Spring Boot, No external JARs)
+* **Data Storage:** Plain text files (`.txt`) using `BufferedReader` and `BufferedWriter` + organized server-side document directory (`data/documents/`)
 
 ---
 
-## 1. Project Folder Structure
+## 1. Complete Centralized Admission Workflow
+
+The admission process follows the official 6-phase centralized seat allotment lifecycle:
+
+```
+Student Registration
+        ↓
+   Student Login
+        ↓
+Personal & Contact Details
+        ↓
+  Academic Marks Entry (SSC, HSC, CET)
+        ↓
+Mandatory Document Upload (Aadhaar, SSC, HSC, CET marksheets - PDF/JPG/PNG)
+        ↓
+Branch Preference Selection (Arranged in Priority Order 1 to 6)
+        ↓
+Final Application Submission
+        ↓
+Admin Scrutiny & Document Verification (Approve or Reject credentials)
+        ↓
+Admin Branch Allocation (Assign engineering seat with allocation remarks)
+        ↓
+Student Notification & Provisional Allotment Review
+        ↓
+Student Action:
+   ├── ACCEPT ALLOCATION ──→ Admission Confirmed / Seat Freezed 🎓
+   └── REJECT ALLOCATION ──→ Returned to Admission Committee for Reallocation ↺
+```
+
+---
+
+## 2. Project Folder Structure
 
 ```
 CollegeAdmissionPortal/
@@ -17,123 +49,139 @@ CollegeAdmissionPortal/
 ├── run.bat                     # Double-click runner script for Windows
 ├── README.md                   # Project documentation & viva guide
 │
-├── frontend/                   # All user interface files (HTML + CSS)
+├── frontend/                   # All user interface files (HTML + CSS + Vanilla JS)
 │   ├── index.html              # Home page with portal overview & admission steps
 │   ├── register.html           # Student registration form
 │   ├── login.html              # Student login form
-│   ├── application.html        # Admission application form (SSC, HSC, CET marks)
-│   ├── status.html             # Application tracking & verification status
+│   ├── application.html        # Multi-section admission form (Academic, Document Uploads, Branch Preferences)
+│   ├── status.html             # Application status tracker, document previews, & branch acceptance/rejection
 │   ├── admin-login.html        # Admission officer / Admin login
-│   ├── admin-dashboard.html    # Admin panel to view, approve, or reject applications
-│   └── style.css               # Professional government/CET portal styling
+│   ├── admin-dashboard.html    # Admin scrutiny modal, document verification, & branch allocation panel
+│   └── style.css               # Professional government/CET portal styling with modals and responsive grids
 │
 ├── backend/                    # Core Java classes demonstrating OOP
 │   ├── User.java               # Abstract superclass (Encapsulation, Inheritance, Abstraction)
 │   ├── Student.java            # Subclass representing a student (Inheritance, Polymorphism)
 │   ├── Admin.java              # Subclass representing an admin (Inheritance, Polymorphism)
-│   ├── Application.java        # Model class encapsulating application details
-│   ├── AdmissionSystem.java    # Business logic, ArrayLists, and .txt File I/O
-│   └── Main.java               # Core Java built-in HttpServer connecting frontend & backend
+│   ├── Document.java           # Model class encapsulating uploaded credentials (Encapsulation)
+│   ├── Application.java        # Model class encapsulating application details, preferences, and documents
+│   ├── AdmissionSystem.java    # Central business controller, ArrayLists, and file handling I/O
+│   └── Main.java               # Core Java built-in HttpServer connecting frontend & backend REST APIs
 │
-└── data/                       # Plain text database files
-    ├── students.txt            # Registered student accounts
-    ├── applications.txt        # Submitted admission application records
-    └── admin.txt               # Administrator credentials
+└── data/                       # Plain text database and document storage
+    ├── students.txt            # Registered student accounts (ID|Name|Email|Password|Phone)
+    ├── applications.txt        # Full admission records with preferences, allocation, and document maps
+    ├── admin.txt               # Administrator credentials
+    └── documents/              # Organized server-side storage for candidate document uploads
+        ├── APP1001/
+        ├── APP1004/
+        └── APP1005/
 ```
 
 ---
 
-## 2. Explanation of What Each File Does
+## 3. Key Feature Modules & Implementation
 
-### Backend (Java)
-1. **`User.java`**:
-   - An `abstract` parent class.
-   - Defines common fields (`id`, `name`, `email`, `password`, `phoneNumber`, `role`).
-   - Private fields with public getters and setters demonstrate **Encapsulation**.
-   - Declares the abstract method `public abstract String getRoleDescription();` which demonstrates **Abstraction** and allows **Polymorphism**.
-2. **`Student.java`**:
-   - Extends `User` (`public class Student extends User`), demonstrating **Inheritance**.
-   - Calls `super(...)` in constructor.
-   - Overrides `getRoleDescription()` returning `"Student Applicant eligible to apply for Degree College Admissions."`, demonstrating **Polymorphism (Method Overriding)**.
-   - Converts objects to/from text file strings (`toDataString()` and `fromDataString()`).
-3. **`Admin.java`**:
-   - Extends `User`, demonstrating **Inheritance**.
-   - Overrides `getRoleDescription()` returning `"System Administrator with full authority to review, approve, or reject admission applications."`.
-4. **`Application.java`**:
-   - Represents an admission application with fields: `applicationId`, `studentEmail`, `studentName`, `sscMarks`, `hscMarks`, `cetScore`, `courseChoice`, `category`, `status`, and `remarks`.
-   - Uses private fields with getters and setters (**Encapsulation**).
-5. **`AdmissionSystem.java`**:
-   - The central business controller.
-   - Stores data in in-memory collections: `ArrayList<Student>`, `ArrayList<Admin>`, and `ArrayList<Application>`.
-   - Reads from and writes to `.txt` files using Java file handling (`FileReader`, `BufferedReader`, `FileWriter`, `BufferedWriter`).
-   - Methods include `registerStudent()`, `authenticateStudent()`, `authenticateAdmin()`, `submitApplication()`, and `updateApplicationStatus()`.
-6. **`Main.java`**:
-   - The execution entry point (`public static void main(String[] args)`).
-   - Starts Java's built-in web server `HttpServer` (part of standard JDK since Java 6) on port `8080`.
-   - Serves HTML and CSS files to the browser.
-   - Receives form data (`POST` requests) and queries (`GET` requests), interacts with `AdmissionSystem`, and returns responses.
+### 1. Student Document Upload
+- **Mandatory Documents Supported:**
+  1. Aadhaar Card
+  2. SSC (10th) Marksheet
+  3. HSC (12th) Marksheet
+  4. MHT-CET Scorecard
+  5. Other Supporting Document (Caste, Income, Domicile)
+- **Validation:** Enforces supported formats (`.pdf`, `.jpg`, `.jpeg`, `.png`) and file size limits (maximum 5 MB per document).
+- **Server Storage:** Uploaded files are organized in `data/documents/<appId>/` with sanitized filenames and mapped in `Application`. Files remain permanently accessible across server restarts.
+- **Preview & Download:** Candidates and admins can preview files in-modal (`/api/document/view` with `Content-Disposition: inline`) or download them (`/api/document/download` with `Content-Disposition: attachment`).
 
-### Frontend (HTML & CSS)
-1. **`style.css`**: Professional CET-style theme with a navy blue header (`#0d3b66`), golden accents (`#f4a261`), cards, responsive grids, and color-coded status badges (Pending, Approved, Rejected).
-2. **`index.html`**: Welcome portal with navigation links, announcements, and quick access cards.
-3. **`register.html`**: Student account creation form.
-4. **`login.html`**: Student authentication form.
-5. **`application.html`**: Form to submit 10th SSC, 12th HSC, CET percentile, course choice, and reservation category.
-6. **`status.html`**: Live status tracker displaying application summary, committee remarks, and colored approval badge.
-7. **`admin-login.html`**: Official login for admission committee members.
-8. **`admin-dashboard.html`**: Admin panel showing count summary cards, full table of applications, and "Approve" / "Reject" buttons.
+### 2. Branch Preference Selection
+- Candidates choose from 6 engineering branches:
+  1. Computer Engineering
+  2. Information Technology
+  3. Artificial Intelligence & Data Science
+  4. Electronics & Telecommunication
+  5. Mechanical Engineering
+  6. Civil Engineering
+- **Priority Ordering:** Interactive priority selector (1st Priority to 6th Priority) with **Up (▲)** and **Down (▼)** buttons to arrange preferences.
+- **Validation:** Automatic duplicate branch detection preventing duplicate selections.
+- **Review Summary:** Live summary box allowing candidates to review their ordered choices prior to submission.
 
-### Data Storage (.txt Files)
-* **`data/students.txt`**: Pipe-delimited records: `StudentID|FullName|Email|Password|PhoneNumber`
-* **`data/applications.txt`**: Records: `ApplicationID|StudentEmail|StudentName|SSCMarks|HSCMarks|CETScore|CourseChoice|Category|Status|Remarks`
-* **`data/admin.txt`**: Records: `AdminID|FullName|Email|Password|PhoneNumber`
+### 3. Admin Document Verification
+- In `admin-dashboard.html`, clicking **Scrutiny & Allocate** opens a comprehensive scrutiny modal.
+- Displays candidate full name, registered email, phone number, category, and academic scores (10th %, 12th %, CET percentile).
+- Lists all uploaded marksheets with real-time status and **Preview** / **Download** buttons.
+- Admin can mark documents as **Documents Verified** or **Verification Rejected** with official scrutiny remarks.
 
----
+### 4. Admin Branch Allocation
+- Admin inspects candidate merit, document status, and the candidate's prioritized branch choices.
+- Admin selects an available engineering branch from a dropdown and provides official allocation remarks.
+- Submitting updates the allocation status to **Awaiting Student Acceptance** and dispatches the decision to the candidate.
+- Supported Allocation Statuses:
+  - `Pending Allocation`
+  - `Branch Allocated`
+  - `Awaiting Student Acceptance`
+  - `Accepted` (Admission Confirmed)
+  - `Rejected`
+  - `Allocation Rejected by Student`
 
-## 3. How the HTML Frontend Connects to the Java Backend
-
-1. **Local Server**:
-   When you run `java Main`, Java's built-in `HttpServer` begins listening at `http://localhost:8080/`.
-2. **Serving Web Pages**:
-   When you open `http://localhost:8080/` in Google Chrome or Microsoft Edge, `Main.java` reads `frontend/index.html` and sends the HTML and CSS bytes to the browser.
-3. **Sending Form Data**:
-   When a user clicks "Register" or "Submit Application", JavaScript's standard `fetch()` sends the input values to the Java server via an HTTP POST request (e.g., to `/api/register` or `/api/apply`).
-4. **Processing & File Saving**:
-   `Main.java` receives the form data, parses the parameters, creates the appropriate Java object (`new Student(...)` or `new Application(...)`), adds it to the `ArrayList`, and writes the record into the respective `.txt` file using `BufferedWriter`.
-5. **Updating the Browser**:
-   `Main.java` sends back a JSON response (e.g. `{"success": true, "message": "Registered successfully"}`). The frontend reads this response and updates the page or redirects the user without needing a full page reload.
+### 5. Student Branch Acceptance & Confirmation
+- In `status.html`, when a seat is allocated, a prominent **Provisional Seat Allocation Card** is displayed showing the allocated branch, merit scores, and admin remarks.
+- Features explicit **Accept** and **Reject** buttons:
+  - **Accept:** Sets status to `Accepted` / `Admission Confirmed`. The provisional admission certificate is unlocked and displayed.
+  - **Reject:** Sets status to `Allocation Rejected by Student` and returns the application to the admin panel with the candidate's reason for reallocation.
+  - Candidates are **never** considered admitted before explicitly accepting their allocation.
 
 ---
 
-## 4. OOPS Concepts Viva Cheat Sheet
+## 4. REST API Endpoints Reference
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/register` | Student account registration |
+| `POST` | `/api/login` | Student authentication |
+| `POST` | `/api/apply` | Application submission with academic marks and branch preferences |
+| `POST` | `/api/upload-document` | Uploads binary document file (PDF/JPG/PNG) for candidate |
+| `GET` | `/api/document/view` | Streams file with `inline` disposition for in-browser preview |
+| `GET` | `/api/document/download` | Streams file with `attachment` disposition for download |
+| `GET` | `/api/status?email=...` | Retrieves student application status, preferences, documents, and allocation |
+| `POST` | `/api/student/allocation-response` | Candidate submits `Accept` or `Reject` decision |
+| `POST` | `/api/admin-login` | Administrator authentication |
+| `GET` | `/api/admin/applications` | Retrieves all applications with full details for scrutiny |
+| `POST` | `/api/admin/verify-documents` | Updates document verification status (`Documents Verified` / `Verification Rejected`) |
+| `POST` | `/api/admin/allocate-branch` | Assigns branch and sets status to `Awaiting Student Acceptance` |
+| `POST` | `/api/admin/action` | Legacy status update (`Approved` / `Rejected`) |
+
+---
+
+## 5. OOPS Concepts Viva Cheat Sheet
 
 | OOP Concept | Where it is Used in Code | Explanation for Viva |
 | :--- | :--- | :--- |
-| **Classes & Objects** | All files | `Student`, `Admin`, and `Application` are blueprints (classes). When `new Student(...)` is executed, an instance (object) is created in memory. |
-| **Encapsulation** | `User.java`, `Application.java` | Variables are declared `private` to prevent unauthorized direct modification from outside classes. They can only be read or modified through public `getter` and `setter` methods. |
-| **Inheritance** | `Student extends User`, `Admin extends User` | `User` is the base class containing common fields (`id`, `name`, `email`, `password`). Both `Student` and `Admin` inherit these fields using `extends`, eliminating code duplication. |
-| **Constructor Chaining (`super`)** | `Student.java`, `Admin.java` | Child constructors call `super(id, name, email, password, phone, role)` to invoke the parent `User` constructor. |
-| **Abstraction** | `User.java` | `User` is declared `abstract`. It cannot be instantiated directly and forces subclasses to implement required methods like `getRoleDescription()`. |
-| **Polymorphism (Method Overriding)** | `getRoleDescription()` in `Student` and `Admin` | Both `Student` and `Admin` override `getRoleDescription()` to provide their own distinct role descriptions. The exact method called is decided at runtime based on the object type. |
-| **Collections (`ArrayList`)** | `AdmissionSystem.java` | `ArrayList<Student>` and `ArrayList<Application>` are used to dynamically store and manage objects in memory during program execution. |
-| **File Handling (I/O)** | `AdmissionSystem.java` | Uses `BufferedReader` and `FileReader` to read text files line by line, and `BufferedWriter` and `FileWriter` to write updated records to `.txt` files. |
+| **Classes & Objects** | All Java files | `Student`, `Admin`, `Document`, and `Application` are blueprints (classes). Calling `new Application(...)` instantiates an object in memory. |
+| **Encapsulation** | `User.java`, `Document.java`, `Application.java` | Member variables are declared `private` to prevent unauthorized modification. Controlled access is provided through public getters and setters. |
+| **Inheritance** | `Student extends User`, `Admin extends User` | `User` is the base parent class containing common attributes (`id`, `name`, `email`, `password`, `phone`). Both `Student` and `Admin` inherit them, eliminating duplication. |
+| **Constructor Chaining (`super`)** | `Student.java`, `Admin.java` | Child constructors call `super(...)` to invoke the parent `User` constructor. |
+| **Abstraction** | `User.java` | `User` is declared `abstract`. It cannot be directly instantiated and declares the abstract method `public abstract String getRoleDescription()`. |
+| **Polymorphism (Method Overriding)** | `getRoleDescription()` in `Student` and `Admin` | Subclasses override `getRoleDescription()` to return role-specific descriptions at runtime. |
+| **Method Overloading** | `Application.java`, `AdmissionSystem.java` | Multiple constructors and `submitApplication(...)` methods with different parameter signatures provide flexibility. |
+| **Collections (`ArrayList`, `Map`)** | `AdmissionSystem.java`, `Application.java` | Dynamic lists `ArrayList<Student>` and `ArrayList<Application>` manage memory records; `Map<String, String>` maps uploaded documents. |
+| **File Handling & Binary I/O** | `AdmissionSystem.java`, `Main.java` | Uses `BufferedReader`/`BufferedWriter` for text records, and `FileOutputStream`/`FileInputStream` for binary document uploads. |
 
 ---
 
-## 5. How to Compile and Run on Windows
+## 6. How to Compile and Run on Windows
 
 ### Option 1: One-Click Runner (Easiest)
 1. Open the `CollegeAdmissionPortal` folder.
 2. Double-click the file named **`run.bat`**.
-3. It will compile the Java backend, start the server, and automatically launch your browser to `http://localhost:8080/`.
+3. It compiles the Java backend, starts the server at `http://localhost:8080/`, and launches your browser.
 
 ---
 
-### Option 2: Manual Command Prompt / PowerShell
+### Option 2: Manual Terminal / PowerShell
 1. Open **Command Prompt** (`cmd`) or **PowerShell**.
 2. Navigate to the `backend` folder:
    ```cmd
-   cd "D:\Projects\oOPS NEW\CollegeAdmissionPortal\backend"
+   cd "c:\Projects\oops project\CollegeAdmissionPortal\backend"
    ```
 3. Compile all Java files:
    ```cmd
@@ -143,7 +191,7 @@ CollegeAdmissionPortal/
    ```cmd
    java Main
    ```
-5. Open your web browser (Chrome, Edge, Firefox) and navigate to:
+5. Open your web browser to:
    ```
    http://localhost:8080/
    ```
@@ -152,15 +200,14 @@ To stop the server at any time, press **`Ctrl + C`** in the terminal window.
 
 ---
 
-## 6. Pre-configured Demo Accounts
+## 7. Pre-configured Demo Accounts
 
-### Student Account:
-* **Email:** `rahul@gmail.com`
-* **Password:** `rahul123`
-*(Or click "New Registration" to create your own account)*
+### Student Accounts:
+* **Email:** `rahul@gmail.com` | **Password:** `rahul123`
+* **Email:** `aniket@gmail.com` | **Password:** `aniket123`
+* *(Or click "New Registration" to create a new applicant account)*
 
 ### Admin Officer Account:
 * **Email:** `admin@cet.gov.in`
 * **Password:** `admin123`
-*(Pre-configured in `data/admin.txt`)*
-
+* *(Pre-configured in `data/admin.txt`)*

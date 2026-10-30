@@ -1,10 +1,13 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ============================================================================
@@ -19,17 +22,14 @@ import java.util.ArrayList;
  *   - Acts as the central controller and database manager for the portal.
  *   - Loads data from .txt files into memory (ArrayLists) on system startup.
  *   - Handles Student Registration, Login verification, Application submission,
- *     and Admin approval/rejection operations.
+ *     Document Upload, Admin verification, Branch allocation, and Student acceptance.
  *   - Writes updated records back into the respective .txt files.
  *
  * Where the data is saved:
  *   - data/students.txt     -> Registered student credentials
  *   - data/admin.txt        -> Admin officer credentials
  *   - data/applications.txt -> All submitted admission application forms
- *
- * How frontend communicates with backend:
- *   - Main.java receives HTTP form submissions from HTML frontend, calls methods
- *     in this class, and returns results to the web browser.
+ *   - data/documents/       -> Server-side directory storing uploaded student documents
  * ============================================================================
  */
 public class AdmissionSystem {
@@ -47,17 +47,18 @@ public class AdmissionSystem {
     // Dynamic list holding all submitted Application objects in memory
     private ArrayList<Application> applicationList;
 
-    // File paths pointing to our text files
+    // File paths pointing to our text files and documents directory
     private String studentsFilePath;
     private String adminFilePath;
     private String applicationsFilePath;
+    private String documentsDirPath;
 
     // -------------------------------------------------------------
     // Constructor
     // What it does: Initializes ArrayLists and loads saved records from disk.
     // -------------------------------------------------------------
     public AdmissionSystem() {
-        // Initialize the in-memory ArrayList collections
+        // Initialize in-memory ArrayList collections
         studentList = new ArrayList<>();
         adminList = new ArrayList<>();
         applicationList = new ArrayList<>();
@@ -83,17 +84,23 @@ public class AdmissionSystem {
     //               runs smoothly whether started from root or backend/ folder.
     // -------------------------------------------------------------
     private void resolveFilePaths() {
-        // Check if "data" directory is in current working folder
         File dataDir = new File("data");
         if (dataDir.exists() && dataDir.isDirectory()) {
             studentsFilePath = "data/students.txt";
             adminFilePath = "data/admin.txt";
             applicationsFilePath = "data/applications.txt";
+            documentsDirPath = "data/documents";
         } else {
-            // Otherwise, check parent directory (e.g., if running from backend/)
             studentsFilePath = "../data/students.txt";
             adminFilePath = "../data/admin.txt";
             applicationsFilePath = "../data/applications.txt";
+            documentsDirPath = "../data/documents";
+        }
+
+        // Ensure documents directory exists
+        File docDir = new File(documentsDirPath);
+        if (!docDir.exists()) {
+            docDir.mkdirs();
         }
     }
 
@@ -101,30 +108,16 @@ public class AdmissionSystem {
     // FILE HANDLING METHODS (READING FROM .TXT FILES)
     // =============================================================
 
-    // -------------------------------------------------------------
-    // Method: loadStudentsFromFile
-    // What it does: Reads data/students.txt line by line using BufferedReader.
-    // Why it is used: Restores student accounts when server restarts.
-    // -------------------------------------------------------------
     public void loadStudentsFromFile() {
-        // Clear current list to avoid duplicates
         studentList.clear();
-
         File file = new File(studentsFilePath);
-        // If file does not exist yet, nothing to load
-        if (!file.exists()) {
-            return;
-        }
+        if (!file.exists()) return;
 
-        // Try-with-resources automatically closes the BufferedReader when finished
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            // Read line by line until reaching end of file (null)
             while ((line = reader.readLine()) != null) {
-                // Parse line into Student object
                 Student student = Student.fromDataString(line);
                 if (student != null) {
-                    // Add valid student to the ArrayList
                     studentList.add(student);
                 }
             }
@@ -133,17 +126,10 @@ public class AdmissionSystem {
         }
     }
 
-    // -------------------------------------------------------------
-    // Method: loadAdminsFromFile
-    // What it does: Reads data/admin.txt line by line using BufferedReader.
-    // Why it is used: Loads administrator accounts.
-    // -------------------------------------------------------------
     public void loadAdminsFromFile() {
         adminList.clear();
         File file = new File(adminFilePath);
-        if (!file.exists()) {
-            return;
-        }
+        if (!file.exists()) return;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -158,17 +144,10 @@ public class AdmissionSystem {
         }
     }
 
-    // -------------------------------------------------------------
-    // Method: loadApplicationsFromFile
-    // What it does: Reads data/applications.txt line by line using BufferedReader.
-    // Why it is used: Loads all submitted applications into memory.
-    // -------------------------------------------------------------
     public void loadApplicationsFromFile() {
         applicationList.clear();
         File file = new File(applicationsFilePath);
-        if (!file.exists()) {
-            return;
-        }
+        if (!file.exists()) return;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -187,31 +166,19 @@ public class AdmissionSystem {
     // FILE HANDLING METHODS (WRITING TO .TXT FILES)
     // =============================================================
 
-    // -------------------------------------------------------------
-    // Method: saveStudentsToFile
-    // What it does: Writes all Student objects from studentList into data/students.txt
-    //               using BufferedWriter and FileWriter.
-    // Why it is used: Persists new registrations permanently to disk.
-    // -------------------------------------------------------------
     public synchronized void saveStudentsToFile() {
         try {
             File file = new File(studentsFilePath);
-            // Ensure parent directory exists
             if (file.getParentFile() != null && !file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
 
-            // Open file for writing (false = overwrite full file with current list)
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                // Write header comment
                 writer.write("# Format: StudentID|FullName|Email|Password|PhoneNumber");
                 writer.newLine();
 
-                // Loop through all students in our ArrayList
                 for (Student student : studentList) {
-                    // Write student's data string to file
                     writer.write(student.toDataString());
-                    // Write newline character
                     writer.newLine();
                 }
             }
@@ -220,12 +187,6 @@ public class AdmissionSystem {
         }
     }
 
-    // -------------------------------------------------------------
-    // Method: saveApplicationsToFile
-    // What it does: Writes all Application objects from applicationList into
-    //               data/applications.txt using BufferedWriter and FileWriter.
-    // Why it is used: Persists new applications and status updates (Approve/Reject).
-    // -------------------------------------------------------------
     public synchronized void saveApplicationsToFile() {
         try {
             File file = new File(applicationsFilePath);
@@ -234,11 +195,9 @@ public class AdmissionSystem {
             }
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
-                // Write header comment
-                writer.write("# Format: ApplicationID|StudentEmail|StudentName|SSCMarks|HSCMarks|CETScore|CourseChoice|Category|Status|Remarks");
+                writer.write("# Format: ApplicationID|StudentEmail|StudentName|SSCMarks|HSCMarks|CETScore|CourseChoice|Category|Status|Remarks|BranchPreferences|AllocatedBranch|AllocationStatus|VerificationStatus|UploadedDocuments|AllocationRemarks");
                 writer.newLine();
 
-                // Loop through all applications in our ArrayList
                 for (Application app : applicationList) {
                     writer.write(app.toDataString());
                     writer.newLine();
@@ -253,14 +212,7 @@ public class AdmissionSystem {
     // BUSINESS LOGIC METHODS
     // =============================================================
 
-    // -------------------------------------------------------------
-    // Method: registerStudent
-    // What it does: Checks if email already exists, creates a new Student object,
-    //               adds it to the ArrayList, and saves to students.txt.
-    // Returns: true if registration is successful, false if email is duplicate.
-    // -------------------------------------------------------------
     public synchronized boolean registerStudent(String name, String email, String password, String phone) {
-        // Check if student with this email is already registered
         for (Student s : studentList) {
             if (s.getEmail().equalsIgnoreCase(email.trim())) {
                 System.out.println("[AdmissionSystem] Registration failed: Email already exists -> " + email);
@@ -268,81 +220,83 @@ public class AdmissionSystem {
             }
         }
 
-        // Generate a new sequential student ID (e.g. STU101, STU102)
         String newId = "STU" + (100 + studentList.size() + 1);
-
-        // Create a new Student object using the Student constructor
         Student newStudent = new Student(newId, name.trim(), email.trim(), password.trim(), phone.trim());
-
-        // Add the new student to our ArrayList collection
         studentList.add(newStudent);
-
-        // Save the updated list to data/students.txt
         saveStudentsToFile();
 
         System.out.println("[AdmissionSystem] Student registered successfully: " + newStudent.getName() + " (" + newId + ")");
         return true;
     }
 
-    // -------------------------------------------------------------
-    // Method: authenticateStudent
-    // What it does: Validates student login credentials (email & password).
-    // Returns: The matching Student object if credentials match, else null.
-    // -------------------------------------------------------------
     public Student authenticateStudent(String email, String password) {
-        if (email == null || password == null) {
-            return null;
-        }
-
-        // Iterate through all students in our ArrayList
+        if (email == null || password == null) return null;
         for (Student s : studentList) {
-            // Check if email and password match
             if (s.getEmail().equalsIgnoreCase(email.trim()) && s.getPassword().equals(password.trim())) {
-                return s; // Login successful
+                return s;
             }
         }
-        return null; // Login failed
+        return null;
     }
 
-    // -------------------------------------------------------------
-    // Method: authenticateAdmin
-    // What it does: Validates admin login credentials.
-    // Returns: The matching Admin object if credentials match, else null.
-    // -------------------------------------------------------------
     public Admin authenticateAdmin(String email, String password) {
-        if (email == null || password == null) {
-            return null;
-        }
-
-        // Iterate through all admins in our ArrayList
+        if (email == null || password == null) return null;
         for (Admin a : adminList) {
             if (a.getEmail().equalsIgnoreCase(email.trim()) && a.getPassword().equals(password.trim())) {
-                return a; // Admin login successful
+                return a;
             }
         }
-        return null; // Admin login failed
+        return null;
     }
 
-    // -------------------------------------------------------------
-    // Method: submitApplication
-    // What it does: Creates a new admission Application with initial status "Pending",
-    //               adds it to the ArrayList, and saves to data/applications.txt.
-    // Returns: The created Application object.
-    // -------------------------------------------------------------
+    public Student getStudentByEmail(String email) {
+        if (email == null) return null;
+        for (Student s : studentList) {
+            if (s.getEmail().equalsIgnoreCase(email.trim())) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    // Overloaded submitApplication (calls full method with default branch preference)
     public synchronized Application submitApplication(String studentEmail, String studentName,
                                                      double sscMarks, double hscMarks, double cetScore,
                                                      String courseChoice, String category) {
-        // If student already submitted an application, update existing application
+        List<String> prefs = new ArrayList<>();
+        if (courseChoice != null && !courseChoice.trim().isEmpty()) {
+            prefs.add(courseChoice.trim());
+        }
+        return submitApplication(studentEmail, studentName, sscMarks, hscMarks, cetScore,
+                                 courseChoice, category, prefs);
+    }
+
+    // Full submitApplication with Branch Preferences
+    public synchronized Application submitApplication(String studentEmail, String studentName,
+                                                     double sscMarks, double hscMarks, double cetScore,
+                                                     String courseChoice, String category,
+                                                     List<String> branchPreferences) {
+        // If courseChoice is not explicitly set, use 1st preference
+        if ((courseChoice == null || courseChoice.trim().isEmpty()) && branchPreferences != null && !branchPreferences.isEmpty()) {
+            courseChoice = branchPreferences.get(0);
+        }
+
+        // Check if student already submitted an application; if so, update it
         for (Application existing : applicationList) {
             if (existing.getStudentEmail().equalsIgnoreCase(studentEmail.trim())) {
-                existing.setStudentName(studentName);
+                existing.setStudentName(studentName.trim());
                 existing.setSscMarks(sscMarks);
                 existing.setHscMarks(hscMarks);
                 existing.setCetScore(cetScore);
-                existing.setCourseChoice(courseChoice);
-                existing.setCategory(category);
+                existing.setCourseChoice(courseChoice != null ? courseChoice.trim() : "");
+                existing.setCategory(category.trim());
+                if (branchPreferences != null && !branchPreferences.isEmpty()) {
+                    existing.setBranchPreferences(new ArrayList<>(branchPreferences));
+                }
                 existing.setStatus("Pending");
-                existing.setRemarks("Application updated. Verification in progress.");
+                existing.setAllocationStatus("Pending Allocation");
+                existing.setVerificationStatus("Pending Verification");
+                existing.setRemarks("Application submitted. Scrutiny and verification in progress.");
                 saveApplicationsToFile();
                 return existing;
             }
@@ -351,15 +305,22 @@ public class AdmissionSystem {
         // Generate new sequential application ID (e.g. APP1001)
         String newAppId = "APP" + (1000 + applicationList.size() + 1);
 
-        // Default status is "Pending" and default remark is "Verification Pending"
+        List<String> prefs = (branchPreferences != null && !branchPreferences.isEmpty())
+                             ? new ArrayList<>(branchPreferences)
+                             : new ArrayList<>();
+        if (prefs.isEmpty() && courseChoice != null && !courseChoice.trim().isEmpty()) {
+            prefs.add(courseChoice.trim());
+        }
+
         Application newApp = new Application(newAppId, studentEmail.trim(), studentName.trim(),
-                                             sscMarks, hscMarks, cetScore, courseChoice.trim(),
-                                             category.trim(), "Pending", "Documents under scrutiny by CET committee.");
+                                             sscMarks, hscMarks, cetScore,
+                                             courseChoice != null ? courseChoice.trim() : "",
+                                             category.trim(), "Pending",
+                                             "Documents under scrutiny by CET committee.",
+                                             prefs, "", "Pending Allocation",
+                                             "Pending Verification", null, "");
 
-        // Add to in-memory list
         applicationList.add(newApp);
-
-        // Write to text file
         saveApplicationsToFile();
 
         System.out.println("[AdmissionSystem] New Application submitted: " + newAppId + " for " + studentEmail);
@@ -367,9 +328,172 @@ public class AdmissionSystem {
     }
 
     // -------------------------------------------------------------
-    // Method: getApplicationByEmail
-    // What it does: Finds a student's application using their registered email.
+    // Method: saveUploadedDocument
+    // What it does: Validates file type, writes binary bytes into an organized
+    //               folder (data/documents/<appId>/), updates Application,
+    //               and persists references to data/applications.txt.
     // -------------------------------------------------------------
+    public synchronized boolean saveUploadedDocument(String appId, String docType,
+                                                    String originalFileName, byte[] fileBytes) {
+        Application app = getApplicationById(appId);
+        if (app == null) {
+            // Also try looking up by email in case appId parameter was email
+            app = getApplicationByEmail(appId);
+        }
+        if (app == null) {
+            System.err.println("[AdmissionSystem] Document upload failed: Application not found -> " + appId);
+            return false;
+        }
+
+        if (fileBytes == null || fileBytes.length == 0) {
+            System.err.println("[AdmissionSystem] Document upload failed: Empty file payload");
+            return false;
+        }
+
+        // Validate file size (max 5 MB)
+        if (fileBytes.length > 5 * 1024 * 1024) {
+            System.err.println("[AdmissionSystem] Document upload failed: File exceeds 5MB limit");
+            return false;
+        }
+
+        // Validate extension
+        String cleanName = new File(originalFileName).getName();
+        String ext = "";
+        int dotIdx = cleanName.lastIndexOf('.');
+        if (dotIdx >= 0) {
+            ext = cleanName.substring(dotIdx).toLowerCase();
+        }
+        if (!ext.equals(".pdf") && !ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".png")) {
+            System.err.println("[AdmissionSystem] Document upload failed: Unsupported file extension -> " + ext);
+            return false;
+        }
+
+        // Create organized student document directory: data/documents/<appId>/
+        File appDocDir = new File(documentsDirPath, app.getApplicationId());
+        if (!appDocDir.exists()) {
+            appDocDir.mkdirs();
+        }
+
+        // Generate stored file name: e.g. "aadhaar_AadhaarCard.pdf"
+        String storedFileName = docType.trim().toLowerCase() + "_" + cleanName.replaceAll("[^a-zA-Z0-9._-]", "_");
+        File targetFile = new File(appDocDir, storedFileName);
+
+        // Save bytes to disk
+        try (FileOutputStream fos = new FileOutputStream(targetFile)) {
+            fos.write(fileBytes);
+        } catch (IOException e) {
+            System.err.println("[AdmissionSystem] Error saving document to disk: " + e.getMessage());
+            return false;
+        }
+
+        // Update application reference
+        app.addUploadedDocument(docType.trim().toLowerCase(), storedFileName);
+        saveApplicationsToFile();
+
+        System.out.println("[AdmissionSystem] Saved document: " + docType + " (" + cleanName + ") for " + app.getApplicationId());
+        return true;
+    }
+
+    // -------------------------------------------------------------
+    // Method: getDocumentFile
+    // What it does: Resolves the server-side file on disk for preview or download.
+    // -------------------------------------------------------------
+    public File getDocumentFile(String appId, String docType) {
+        Application app = getApplicationById(appId);
+        if (app == null) {
+            app = getApplicationByEmail(appId);
+        }
+        if (app == null || docType == null) return null;
+
+        String storedName = app.getUploadedDocument(docType);
+        if (storedName == null || storedName.isEmpty()) return null;
+
+        File docFile = new File(new File(documentsDirPath, app.getApplicationId()), storedName);
+        if (docFile.exists() && docFile.isFile()) {
+            return docFile;
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------
+    // Method: verifyApplicationDocuments
+    // What it does: Allows admin to mark documents as "Documents Verified" or "Verification Rejected".
+    // -------------------------------------------------------------
+    public synchronized boolean verifyApplicationDocuments(String appId, String verificationStatus, String remarks) {
+        Application app = getApplicationById(appId);
+        if (app != null) {
+            app.setVerificationStatus(verificationStatus.trim());
+            if (remarks != null && !remarks.trim().isEmpty()) {
+                app.setRemarks(remarks.trim());
+            }
+            saveApplicationsToFile();
+            System.out.println("[AdmissionSystem] Application " + appId + " verification status: " + verificationStatus);
+            return true;
+        }
+        return false;
+    }
+
+    // -------------------------------------------------------------
+    // Method: allocateBranch
+    // What it does: Admin assigns a branch to the student. Status changes to
+    //               "Awaiting Student Acceptance" / "Branch Allocated".
+    // -------------------------------------------------------------
+    public synchronized boolean allocateBranch(String appId, String branch, String remarks) {
+        Application app = getApplicationById(appId);
+        if (app != null) {
+            app.setAllocatedBranch(branch.trim());
+            app.setAllocationStatus("Awaiting Student Acceptance");
+            app.setStatus("Branch Allocated");
+            if (remarks != null && !remarks.trim().isEmpty()) {
+                app.setAllocationRemarks(remarks.trim());
+                app.setRemarks(remarks.trim());
+            } else {
+                app.setAllocationRemarks("Seat allotted in " + branch.trim() + ". Awaiting student acceptance.");
+                app.setRemarks("Seat allotted in " + branch.trim() + ". Awaiting student acceptance.");
+            }
+            saveApplicationsToFile();
+            System.out.println("[AdmissionSystem] Branch allocated for " + appId + ": " + branch);
+            return true;
+        }
+        return false;
+    }
+
+    // -------------------------------------------------------------
+    // Method: respondToAllocation
+    // What it does: Student accepts or rejects the allocated branch.
+    //               - If Accepted -> status becomes "Accepted" (Admission Confirmed).
+    //               - If Rejected -> status becomes "Allocation Rejected by Student",
+    //                 returning to admin for further review/reallocation.
+    // -------------------------------------------------------------
+    public synchronized boolean respondToAllocation(String appId, String decision, String studentRemarks) {
+        Application app = getApplicationById(appId);
+        if (app == null) {
+            app = getApplicationByEmail(appId);
+        }
+        if (app != null) {
+            if ("Accept".equalsIgnoreCase(decision)) {
+                app.setAllocationStatus("Accepted");
+                app.setStatus("Admission Confirmed");
+                String note = "Candidate accepted the allocated branch (" + app.getAllocatedBranch() + "). Admission confirmed!";
+                app.setRemarks(note);
+            } else if ("Reject".equalsIgnoreCase(decision)) {
+                app.setAllocationStatus("Allocation Rejected by Student");
+                app.setStatus("Allocation Rejected - Pending Reallocation");
+                String reason = (studentRemarks != null && !studentRemarks.trim().isEmpty())
+                                ? studentRemarks.trim()
+                                : "Seeking reallocation in subsequent round";
+                app.setRemarks("Allocation rejected by candidate: " + reason + ". Returned to Admission Committee for review.");
+            } else {
+                return false;
+            }
+
+            saveApplicationsToFile();
+            System.out.println("[AdmissionSystem] Student response for " + app.getApplicationId() + ": " + decision);
+            return true;
+        }
+        return false;
+    }
+
     public Application getApplicationByEmail(String email) {
         if (email == null) return null;
         for (Application app : applicationList) {
@@ -380,10 +504,6 @@ public class AdmissionSystem {
         return null;
     }
 
-    // -------------------------------------------------------------
-    // Method: getApplicationById
-    // What it does: Finds an application using its Application ID (e.g. APP1001).
-    // -------------------------------------------------------------
     public Application getApplicationById(String appId) {
         if (appId == null) return null;
         for (Application app : applicationList) {
@@ -394,28 +514,25 @@ public class AdmissionSystem {
         return null;
     }
 
-    // -------------------------------------------------------------
-    // Method: getAllApplications
-    // What it does: Returns the full list of applications for the Admin panel.
-    // -------------------------------------------------------------
     public ArrayList<Application> getAllApplications() {
         return applicationList;
     }
 
-    // -------------------------------------------------------------
-    // Method: updateApplicationStatus
-    // What it does: Allows admin to Approve or Reject an application and add remarks.
-    // -------------------------------------------------------------
     public synchronized boolean updateApplicationStatus(String appId, String newStatus, String remarks) {
         Application app = getApplicationById(appId);
         if (app != null) {
-            // Update the status ("Approved" or "Rejected")
             app.setStatus(newStatus.trim());
-            // Update remarks
+            if ("Approved".equalsIgnoreCase(newStatus)) {
+                app.setAllocationStatus("Accepted");
+                if (app.getAllocatedBranch() == null || app.getAllocatedBranch().isEmpty()) {
+                    app.setAllocatedBranch(app.getCourseChoice());
+                }
+            } else if ("Rejected".equalsIgnoreCase(newStatus)) {
+                app.setAllocationStatus("Rejected");
+            }
             if (remarks != null && !remarks.trim().isEmpty()) {
                 app.setRemarks(remarks.trim());
             }
-            // Save updated state to applications.txt
             saveApplicationsToFile();
             System.out.println("[AdmissionSystem] Application " + appId + " status changed to: " + newStatus);
             return true;
@@ -423,14 +540,11 @@ public class AdmissionSystem {
         return false;
     }
 
-    // Getter for student list
     public ArrayList<Student> getStudentList() {
         return studentList;
     }
 
-    // Getter for admin list
     public ArrayList<Admin> getAdminList() {
         return adminList;
     }
 }
-

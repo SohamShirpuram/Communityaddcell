@@ -1,14 +1,9 @@
 <!DOCTYPE html>
-<!-- Declare standard HTML5 document type -->
 <html lang="en">
 <head>
-    <!-- Character set -->
     <meta charset="UTF-8">
-    <!-- Viewport responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Page title -->
-    <title>Admin Dashboard - CET Admission Scrutiny</title>
-    <!-- CSS link -->
+    <title>Admin Dashboard - CET Admission Scrutiny & Branch Allocation</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,7 +17,6 @@
                 <h1>State CET Cell - Admin Dashboard</h1>
                 <p id="adminGreeting">Welcome, Admission Officer</p>
             </div>
-            <!-- Navigation links -->
             <nav>
                 <a href="index.html">Home</a>
                 <a href="admin-dashboard.html" class="btn-nav-active">Dashboard</a>
@@ -33,38 +27,39 @@
 
     <!-- Notice Bar -->
     <div class="notice-bar">
-        Scrutiny Panel: Review candidate merit and click Approve or Reject to update admission status.
+        Admission Scrutiny Panel: Verify candidate credentials, inspect uploaded documents, and allocate engineering branches based on merit.
     </div>
 
     <!-- ============================================================= -->
     <!-- MAIN CONTENT SECTION (ADMIN DASHBOARD)                        -->
     <!-- ============================================================= -->
-    <main style="max-width: 1200px;">
+    <main style="max-width: 1250px;">
 
         <!-- Summary Statistics Cards Row -->
-        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
-            <!-- Stat 1: Total -->
+        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px;">
             <div class="card" style="margin-bottom: 0; padding: 15px; text-align: center; border-left: 4px solid #0d3b66;">
-                <div style="font-size: 13px; color: #64748b; text-transform: uppercase; font-weight: 600;">Total Applications</div>
-                <div id="statTotal" style="font-size: 28px; font-weight: 700; color: #0d3b66; margin-top: 5px;">0</div>
+                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600;">Total Applications</div>
+                <div id="statTotal" style="font-size: 26px; font-weight: 700; color: #0d3b66; margin-top: 4px;">0</div>
             </div>
 
-            <!-- Stat 2: Pending -->
             <div class="card" style="margin-bottom: 0; padding: 15px; text-align: center; border-left: 4px solid #f59e0b;">
-                <div style="font-size: 13px; color: #64748b; text-transform: uppercase; font-weight: 600;">Pending Review</div>
-                <div id="statPending" style="font-size: 28px; font-weight: 700; color: #d97706; margin-top: 5px;">0</div>
+                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600;">Pending Allocation</div>
+                <div id="statPending" style="font-size: 26px; font-weight: 700; color: #d97706; margin-top: 4px;">0</div>
             </div>
 
-            <!-- Stat 3: Approved -->
+            <div class="card" style="margin-bottom: 0; padding: 15px; text-align: center; border-left: 4px solid #8b5cf6;">
+                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600;">Awaiting Student</div>
+                <div id="statAwaiting" style="font-size: 26px; font-weight: 700; color: #7c3aed; margin-top: 4px;">0</div>
+            </div>
+
             <div class="card" style="margin-bottom: 0; padding: 15px; text-align: center; border-left: 4px solid #2a9d8f;">
-                <div style="font-size: 13px; color: #64748b; text-transform: uppercase; font-weight: 600;">Approved / Allotted</div>
-                <div id="statApproved" style="font-size: 28px; font-weight: 700; color: #2a9d8f; margin-top: 5px;">0</div>
+                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600;">Admission Confirmed</div>
+                <div id="statAccepted" style="font-size: 26px; font-weight: 700; color: #2a9d8f; margin-top: 4px;">0</div>
             </div>
 
-            <!-- Stat 4: Rejected -->
             <div class="card" style="margin-bottom: 0; padding: 15px; text-align: center; border-left: 4px solid #e63946;">
-                <div style="font-size: 13px; color: #64748b; text-transform: uppercase; font-weight: 600;">Rejected</div>
-                <div id="statRejected" style="font-size: 28px; font-weight: 700; color: #e63946; margin-top: 5px;">0</div>
+                <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600;">Rejected</div>
+                <div id="statRejected" style="font-size: 26px; font-weight: 700; color: #e63946; margin-top: 4px;">0</div>
             </div>
         </section>
 
@@ -72,14 +67,12 @@
         <section class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h2>Submitted Candidate Applications</h2>
-                    <p>Live applications loaded directly from <code>data/applications.txt</code>.</p>
+                    <h2>Candidate Applications Scrutiny & Branch Allocation</h2>
+                    <p>Click <strong>Scrutiny & Allocate</strong> to verify documents, view ordered branch choices, and assign a branch.</p>
                 </div>
-                <!-- Refresh Button -->
                 <button onclick="loadApplications();" class="btn btn-primary btn-sm">&#8635; Refresh List</button>
             </div>
 
-            <!-- Alert Box for action notifications -->
             <div id="actionAlert" class="alert alert-success"></div>
 
             <!-- Table Responsive Wrapper -->
@@ -88,168 +81,529 @@
                     <thead>
                         <tr>
                             <th>App ID</th>
-                            <th>Candidate Name</th>
-                            <th>Email</th>
-                            <th>10th %</th>
-                            <th>12th %</th>
-                            <th>CET Score</th>
-                            <th>Branch Preferred</th>
+                            <th>Candidate</th>
                             <th>Category</th>
-                            <th>Current Status</th>
-                            <th>Remarks</th>
+                            <th>SSC / HSC / CET</th>
+                            <th>1st Choice</th>
+                            <th>Documents</th>
+                            <th>Allocation Status</th>
+                            <th>Allocated Branch</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="applicationsTableBody">
-                        <!-- Dynamic rows will be inserted here by JavaScript -->
                         <tr>
-                            <td colspan="11" style="text-align: center; padding: 20px; color: #64748b;">
+                            <td colspan="9" style="text-align: center; padding: 25px; color: #64748b;">
                                 Loading applications from server...
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
         </section>
 
     </main>
 
     <!-- ============================================================= -->
-    <!-- FOOTER SECTION                                                -->
+    <!-- MODAL 1: SCRUTINY & BRANCH ALLOCATION MODAL                   -->
     <!-- ============================================================= -->
+    <div id="scrutinyModal" class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalAppIdTitle">Application Scrutiny & Allocation</h3>
+                    <div style="font-size: 12px; color: #f4a261;" id="modalAppSubtitle">Reviewing candidate merit & documents</div>
+                </div>
+                <button class="modal-close" onclick="closeScrutinyModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Section A: Personal & Contact Information -->
+                <div class="form-section-title" style="margin-top: 0;">
+                    <span class="section-num">1</span> Candidate Personal & Contact Information
+                </div>
+                <div class="detail-grid" style="margin-top: 10px; margin-bottom: 20px;">
+                    <div class="detail-item">
+                        <div class="detail-label">Full Name</div>
+                        <div id="modalName" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Registered Email</div>
+                        <div id="modalEmail" class="detail-value" style="font-size: 14px;">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Phone Number</div>
+                        <div id="modalPhone" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Category</div>
+                        <div id="modalCategory" class="detail-value">-</div>
+                    </div>
+                </div>
+
+                <!-- Section B: Academic Qualifications -->
+                <div class="form-section-title">
+                    <span class="section-num">2</span> Academic Merit & Exam Scores
+                </div>
+                <div class="detail-grid" style="margin-top: 10px; margin-bottom: 20px;">
+                    <div class="detail-item">
+                        <div class="detail-label">10th Standard (SSC)</div>
+                        <div id="modalSsc" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">12th Standard (HSC)</div>
+                        <div id="modalHsc" class="detail-value">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">MHT-CET Percentile</div>
+                        <div id="modalCet" class="detail-value" style="color: #2a9d8f;">-</div>
+                    </div>
+                </div>
+
+                <!-- Section C: Uploaded Documents Verification -->
+                <div class="form-section-title">
+                    <span class="section-num">3</span> Uploaded Documents Verification
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>Current Status: <span id="modalDocStatusBadge" class="badge badge-pending">Pending</span></div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="verifyDocuments('Documents Verified')" class="btn btn-success btn-sm">&#10004; Mark Documents Verified</button>
+                        <button onclick="verifyDocuments('Verification Rejected')" class="btn btn-danger btn-sm">&#10008; Reject Documents</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 0; margin-bottom: 20px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>File Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalDocListBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Section D: Branch Preferences in Priority Order -->
+                <div class="form-section-title">
+                    <span class="section-num">4</span> Branch Preferences in Priority Order
+                </div>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">
+                    Submitted preference sequence chosen by candidate:
+                </p>
+                <ol id="modalPrefList" style="padding-left: 20px; line-height: 1.8; margin-bottom: 20px; color: #1e293b; font-size: 14px;">
+                    <!-- Populated dynamically -->
+                </ol>
+
+                <!-- Section E: Branch Allocation Decision -->
+                <div class="form-section-title">
+                    <span class="section-num">5</span> Branch Allocation Decision
+                </div>
+
+                <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 18px; margin-bottom: 10px;">
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <label style="font-weight: 700; color: #0d3b66;">Current Allocation Status:</label>
+                        <span id="modalAllocStatusBadge" class="badge badge-pending">Pending Allocation</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="allocBranchSelect">Assign Engineering Branch <span class="required-star">*</span></label>
+                        <select id="allocBranchSelect" class="form-control" style="font-weight: 600;">
+                            <option value="">-- Choose Branch to Allocate --</option>
+                            <option value="Computer Engineering">Computer Engineering</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Artificial Intelligence & Data Science">Artificial Intelligence & Data Science</option>
+                            <option value="Electronics & Telecommunication">Electronics & Telecommunication</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Civil Engineering">Civil Engineering</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="allocRemarksInput">Allocation Remarks / Instructions</label>
+                        <input type="text" id="allocRemarksInput" class="form-control" placeholder="e.g. Allotted in Round 1 based on CET Percentile merit under General Category.">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="submitBranchAllocation()" class="btn btn-primary" style="flex: 1;">
+                            &#127891; Allocate Branch & Send to Student
+                        </button>
+                        <button onclick="rejectApplicationModal()" class="btn btn-danger">
+                            &#10008; Reject Application
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeScrutinyModal()" style="background-color: #94a3b8; color: #ffffff;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- MODAL 2: DOCUMENT PREVIEW MODAL                               -->
+    <!-- ============================================================= -->
+    <div id="previewModal" class="modal-backdrop" style="z-index: 1100;">
+        <div class="modal-dialog" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="previewDocTitle">Document Preview</h3>
+                <button class="modal-close" onclick="closePreviewModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div class="doc-preview-container" id="previewContainer">
+                    <p style="color: #64748b;">Loading document preview...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="previewExternalLink" href="#" target="_blank" class="btn btn-accent btn-sm">&#8599; Open in New Tab</a>
+                <a id="previewDownloadLink" href="#" download class="btn btn-primary btn-sm">&#128190; Download File</a>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closePreviewModal()" style="background-color: #94a3b8; color: #ffffff;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <footer>
         <p>&copy; 2026 State Common Entrance Test Cell • College Admission Portal</p>
     </footer>
 
     <!-- ============================================================= -->
-    <!-- JAVASCRIPT: Interacts with Java Backend API                   -->
+    <!-- JAVASCRIPT: Admin API Interactions & Modal Logic              -->
     <!-- ============================================================= -->
     <script>
-        // Display admin greeting if stored
+        // Display admin greeting
         const adminName = sessionStorage.getItem('adminName');
         if (adminName) {
-            document.getElementById('adminGreeting').textContent = "Logged in: " + adminName + " (Admin)";
+            document.getElementById('adminGreeting').textContent = "Logged in: " + adminName + " (Admin Officer)";
         }
 
-        // Alert notification element
         const actionAlert = document.getElementById('actionAlert');
+        let currentApplications = [];
+        let activeApplication = null;
 
-        // Initial fetch of applications on page load
         window.addEventListener('DOMContentLoaded', loadApplications);
 
-        // Function: Loads all applications from Java backend /api/admin/applications
+        // Fetch all applications
         function loadApplications() {
             fetch('/api/admin/applications')
-                .then(response => response.json())
-                .then(applications => {
-                    const tbody = document.getElementById('applicationsTableBody');
-                    tbody.innerHTML = '';
-
-                    let total = applications.length;
-                    let pending = 0;
-                    let approved = 0;
-                    let rejected = 0;
-
-                    if (applications.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 25px; color: #64748b;">No applications submitted yet.</td></tr>';
-                        updateCounters(0, 0, 0, 0);
-                        return;
-                    }
-
-                    // Loop through each application
-                    applications.forEach(app => {
-                        // Count statuses for statistics
-                        const st = app.status.toLowerCase();
-                        if (st === 'approved') approved++;
-                        else if (st === 'rejected') rejected++;
-                        else pending++;
-
-                        // Determine badge style
-                        let badgeClass = 'badge-pending';
-                        if (st === 'approved') badgeClass = 'badge-approved';
-                        if (st === 'rejected') badgeClass = 'badge-rejected';
-
-                        // Create table row element
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td><strong>${app.appId}</strong></td>
-                            <td>${app.name}</td>
-                            <td style="font-size: 13px;">${app.email}</td>
-                            <td>${app.ssc.toFixed(1)}%</td>
-                            <td>${app.hsc.toFixed(1)}%</td>
-                            <td><strong>${app.cet.toFixed(1)}</strong></td>
-                            <td style="font-weight: 500; color: #0d3b66;">${app.course}</td>
-                            <td>${app.category}</td>
-                            <td><span class="badge ${badgeClass}">${app.status}</span></td>
-                            <td style="font-size: 12px; color: #64748b; max-width: 150px;">${app.remarks || '-'}</td>
-                            <td style="white-space: nowrap;">
-                                <button onclick="updateStatus('${app.appId}', 'Approved')" class="btn btn-success btn-sm" style="margin-right: 5px;">
-                                    &#10004; Approve
-                                </button>
-                                <button onclick="updateStatus('${app.appId}', 'Rejected')" class="btn btn-danger btn-sm">
-                                    &#10008; Reject
-                                </button>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-
-                    // Update counter cards
-                    updateCounters(total, pending, approved, rejected);
+                .then(res => res.json())
+                .then(apps => {
+                    currentApplications = apps;
+                    renderApplicationsTable(apps);
                 })
                 .catch(err => {
                     console.error('Error fetching applications:', err);
                 });
         }
 
-        // Helper: Updates stats cards
-        function updateCounters(total, pending, approved, rejected) {
+        function renderApplicationsTable(applications) {
+            const tbody = document.getElementById('applicationsTableBody');
+            tbody.innerHTML = '';
+
+            let total = applications.length;
+            let pending = 0;
+            let awaiting = 0;
+            let accepted = 0;
+            let rejected = 0;
+
+            if (applications.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 25px; color: #64748b;">No applications submitted yet.</td></tr>';
+                updateCounters(0, 0, 0, 0, 0);
+                return;
+            }
+
+            applications.forEach(app => {
+                const allocSt = (app.allocationStatus || 'Pending Allocation').toLowerCase();
+                const overallSt = (app.status || 'Pending').toLowerCase();
+
+                if (allocSt.includes('accepted') || overallSt.includes('approved') || overallSt.includes('confirmed')) {
+                    accepted++;
+                } else if (allocSt.includes('awaiting')) {
+                    awaiting++;
+                } else if (allocSt.includes('rejected') || overallSt.includes('rejected')) {
+                    rejected++;
+                } else {
+                    pending++;
+                }
+
+                // Determine badge style for allocation status
+                let allocBadgeClass = 'badge-pending';
+                if (allocSt.includes('accepted') || overallSt.includes('confirmed')) allocBadgeClass = 'badge-confirmed';
+                else if (allocSt.includes('awaiting')) allocBadgeClass = 'badge-awaiting';
+                else if (allocSt.includes('rejected')) allocBadgeClass = 'badge-rejected';
+
+                // Count documents
+                const docKeys = Object.keys(app.documents || {});
+                const docCountText = docKeys.length > 0 ? `${docKeys.length} uploaded` : 'None';
+                let docBadgeClass = 'badge-pending';
+                if (app.verificationStatus === 'Documents Verified') docBadgeClass = 'badge-verified';
+                else if (app.verificationStatus === 'Verification Rejected') docBadgeClass = 'badge-rejected';
+
+                const firstChoice = (app.preferences && app.preferences.length > 0) ? app.preferences[0] : (app.course || '-');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${app.appId}</strong></td>
+                    <td>
+                        <strong>${app.name}</strong><br>
+                        <span style="font-size: 12px; color: #64748b;">${app.email}</span><br>
+                        <span style="font-size: 11px; color: #0d3b66;">&#128222; ${app.phone || 'N/A'}</span>
+                    </td>
+                    <td>${app.category}</td>
+                    <td style="font-size: 13px;">
+                        SSC: <strong>${app.ssc.toFixed(1)}%</strong><br>
+                        HSC: <strong>${app.hsc.toFixed(1)}%</strong><br>
+                        CET: <strong style="color: #2a9d8f;">${app.cet.toFixed(1)}</strong>
+                    </td>
+                    <td style="font-size: 13px; font-weight: 500; color: #0d3b66;">${firstChoice}</td>
+                    <td>
+                        <span class="badge ${docBadgeClass}">${app.verificationStatus || 'Pending'}</span><br>
+                        <span style="font-size: 12px; color: #64748b;">${docCountText}</span>
+                    </td>
+                    <td><span class="badge ${allocBadgeClass}">${app.allocationStatus || 'Pending Allocation'}</span></td>
+                    <td style="font-weight: 600; color: #0d3b66;">${app.allocatedBranch || '-'}</td>
+                    <td style="white-space: nowrap;">
+                        <button onclick="openScrutinyModal('${app.appId}')" class="btn btn-primary btn-sm">
+                            &#128065; Scrutiny & Allocate
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateCounters(total, pending, awaiting, accepted, rejected);
+        }
+
+        function updateCounters(total, pending, awaiting, accepted, rejected) {
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statPending').textContent = pending;
-            document.getElementById('statApproved').textContent = approved;
+            document.getElementById('statAwaiting').textContent = awaiting;
+            document.getElementById('statAccepted').textContent = accepted;
             document.getElementById('statRejected').textContent = rejected;
         }
 
-        // Function: Updates application status in Java backend /api/admin/action
-        function updateStatus(appId, newStatus) {
-            // Prompt for optional remarks
-            const defaultRemark = newStatus === 'Approved' ? 'Merit verified. Seat allocated.' : 'Did not satisfy branch cutoff score.';
-            const remarks = prompt(`Enter remarks for marking ${appId} as "${newStatus}":`, defaultRemark);
+        // Open Application Scrutiny & Allocation Modal
+        function openScrutinyModal(appId) {
+            const app = currentApplications.find(a => a.appId === appId);
+            if (!app) return;
+            activeApplication = app;
 
-            // If admin cancelled prompt, abort
+            document.getElementById('modalAppIdTitle').textContent = `Scrutiny & Allocation: ${app.appId}`;
+            document.getElementById('modalAppSubtitle').textContent = `Candidate: ${app.name} (${app.email})`;
+
+            document.getElementById('modalName').textContent = app.name;
+            document.getElementById('modalEmail').textContent = app.email;
+            document.getElementById('modalPhone').textContent = app.phone || 'N/A';
+            document.getElementById('modalCategory').textContent = app.category;
+
+            document.getElementById('modalSsc').textContent = app.ssc.toFixed(2) + '%';
+            document.getElementById('modalHsc').textContent = app.hsc.toFixed(2) + '%';
+            document.getElementById('modalCet').textContent = app.cet.toFixed(2) + ' Percentile';
+
+            // Document status badge
+            const docBadge = document.getElementById('modalDocStatusBadge');
+            const vStatus = app.verificationStatus || 'Pending Verification';
+            docBadge.textContent = vStatus;
+            docBadge.className = 'badge ' + (vStatus === 'Documents Verified' ? 'badge-verified' : (vStatus === 'Verification Rejected' ? 'badge-rejected' : 'badge-pending'));
+
+            // Populate Document List
+            const docListBody = document.getElementById('modalDocListBody');
+            docListBody.innerHTML = '';
+            const allTypes = [
+                { key: 'aadhaar', title: 'Aadhaar Card' },
+                { key: 'ssc', title: 'SSC (10th) Marksheet' },
+                { key: 'hsc', title: 'HSC (12th) Marksheet' },
+                { key: 'cet', title: 'CET Scorecard' },
+                { key: 'other', title: 'Other Supporting Document' }
+            ];
+
+            const docs = app.documents || {};
+            allTypes.forEach(t => {
+                const storedFile = docs[t.key];
+                const tr = document.createElement('tr');
+
+                if (storedFile) {
+                    tr.innerHTML = `
+                        <td><strong>${t.title}</strong></td>
+                        <td style="font-size: 13px; color: #0f766e;">${storedFile}</td>
+                        <td><span class="badge badge-approved">&#10004; Uploaded</span></td>
+                        <td>
+                            <button onclick="previewDocument('${app.appId}', '${t.key}', '${t.title}')" class="btn btn-accent btn-sm" style="margin-right: 4px;">Preview</button>
+                            <a href="/api/document/download?appId=${encodeURIComponent(app.appId)}&docType=${encodeURIComponent(t.key)}" class="btn btn-primary btn-sm" download>Download</a>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td>${t.title}</td>
+                        <td style="color: #94a3b8; font-style: italic;">Not uploaded</td>
+                        <td><span class="badge badge-pending">Missing</span></td>
+                        <td>-</td>
+                    `;
+                }
+                docListBody.appendChild(tr);
+            });
+
+            // Populate Preferences
+            const prefList = document.getElementById('modalPrefList');
+            prefList.innerHTML = '';
+            const prefs = app.preferences || (app.course ? [app.course] : []);
+            prefs.forEach((p, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>Choice ${idx + 1}:</strong> <span style="color: #0d3b66; font-weight: 600;">${p}</span>`;
+                prefList.appendChild(li);
+            });
+
+            // Allocation State
+            const allocBadge = document.getElementById('modalAllocStatusBadge');
+            const aStatus = app.allocationStatus || 'Pending Allocation';
+            allocBadge.textContent = aStatus;
+            allocBadge.className = 'badge ' + (aStatus === 'Accepted' ? 'badge-confirmed' : (aStatus === 'Awaiting Student Acceptance' ? 'badge-awaiting' : (aStatus === 'Rejected' ? 'badge-rejected' : 'badge-pending')));
+
+            // Branch dropdown default to candidate's 1st preference or currently allocated branch
+            const select = document.getElementById('allocBranchSelect');
+            select.value = app.allocatedBranch || (prefs.length > 0 ? prefs[0] : '');
+
+            document.getElementById('allocRemarksInput').value = app.allocationRemarks || `Seat allotted based on MHT-CET score of ${app.cet.toFixed(2)} under ${app.category} category.`;
+
+            document.getElementById('scrutinyModal').style.display = 'flex';
+        }
+
+        function closeScrutinyModal() {
+            document.getElementById('scrutinyModal').style.display = 'none';
+        }
+
+        // Document Verification Action
+        function verifyDocuments(status) {
+            if (!activeApplication) return;
+            const remarks = prompt(`Enter verification remarks for ${activeApplication.appId}:`,
+                status === 'Documents Verified' ? 'All credential marksheets verified successfully.' : 'Uploaded documents are unreadable or incomplete.');
             if (remarks === null) return;
 
-            const formData = new URLSearchParams();
-            formData.append('appId', appId);
-            formData.append('action', newStatus);
-            formData.append('remarks', remarks);
+            const fd = new URLSearchParams();
+            fd.append('appId', activeApplication.appId);
+            fd.append('status', status);
+            fd.append('remarks', remarks);
 
-            // Send POST request to backend
-            fetch('/api/admin/action', {
+            fetch('/api/admin/verify-documents', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData.toString()
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: fd.toString()
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    actionAlert.textContent = data.message;
-                    actionAlert.style.display = 'block';
-                    // Re-fetch applications list to reflect changes in real time
+                    showNotification(data.message);
                     loadApplications();
-                    // Hide alert after 4 seconds
-                    setTimeout(() => { actionAlert.style.display = 'none'; }, 4000);
+                    closeScrutinyModal();
+                } else {
+                    alert(data.message);
                 }
-            })
-            .catch(err => {
-                alert('Error updating status on server.');
             });
+        }
+
+        // Branch Allocation Action
+        function submitBranchAllocation() {
+            if (!activeApplication) return;
+            const branch = document.getElementById('allocBranchSelect').value;
+            const remarks = document.getElementById('allocRemarksInput').value;
+
+            if (!branch) {
+                alert('Please select a branch to allocate!');
+                return;
+            }
+
+            const fd = new URLSearchParams();
+            fd.append('appId', activeApplication.appId);
+            fd.append('branch', branch);
+            fd.append('remarks', remarks);
+
+            fetch('/api/admin/allocate-branch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: fd.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    loadApplications();
+                    closeScrutinyModal();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // Reject Application from Modal
+        function rejectApplicationModal() {
+            if (!activeApplication) return;
+            const remarks = prompt(`Enter rejection remarks for ${activeApplication.appId}:`, 'Did not satisfy branch cutoff / eligibility criteria.');
+            if (remarks === null) return;
+
+            const fd = new URLSearchParams();
+            fd.append('appId', activeApplication.appId);
+            fd.append('action', 'Rejected');
+            fd.append('remarks', remarks);
+
+            fetch('/api/admin/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: fd.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message);
+                    loadApplications();
+                    closeScrutinyModal();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        // Preview Document Modal
+        function previewDocument(appId, docType, docTitle) {
+            document.getElementById('previewDocTitle').textContent = `Document Preview: ${docTitle} (${appId})`;
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = '<p style="color: #64748b;">Loading document preview...</p>';
+
+            const viewUrl = `/api/document/view?appId=${encodeURIComponent(appId)}&docType=${encodeURIComponent(docType)}`;
+            const downloadUrl = `/api/document/download?appId=${encodeURIComponent(appId)}&docType=${encodeURIComponent(docType)}`;
+
+            document.getElementById('previewExternalLink').href = viewUrl;
+            document.getElementById('previewDownloadLink').href = downloadUrl;
+
+            // Find file extension to embed iframe or img
+            const app = currentApplications.find(a => a.appId === appId);
+            const fileName = (app && app.documents) ? (app.documents[docType] || '') : '';
+
+            if (fileName.toLowerCase().endsWith('.pdf')) {
+                container.innerHTML = `<iframe src="${viewUrl}" title="${docTitle}"></iframe>`;
+            } else {
+                container.innerHTML = `<img src="${viewUrl}" alt="${docTitle}" onerror="this.src=''; this.alt='Preview unavailable. Please use Download button.';">`;
+            }
+
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('previewContainer').innerHTML = '';
+        }
+
+        function showNotification(msg) {
+            actionAlert.textContent = msg;
+            actionAlert.style.display = 'block';
+            setTimeout(() => { actionAlert.style.display = 'none'; }, 4000);
         }
     </script>
 
 </body>
 </html>
-
